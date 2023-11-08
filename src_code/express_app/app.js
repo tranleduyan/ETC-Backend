@@ -10,11 +10,13 @@ app.use(cors());
 app.use(express.json());
 
 /** Import routes */
+const authenticationRoutes = require('../src/routes/AuthenticationRoutes');
 
 /** Define the port */
 const PORT = 5000;
 
 /** Use the routes (Middleware) */
+app.use("/api/authentication", authenticationRoutes);
 
 /** Start the server */
 app.listen(PORT, (err) => {
