@@ -56,14 +56,15 @@ async function SignInValidator(response, requestBody) {
         const existUser = await db.select("ACCOUNT_PASSWORD").from("user_info").where("EMAIL_ADDRESS", "=", emailAddress.toLowerCase().trim()).first();
         if(!existUser) {
             return responseBuilder.BuildResponse(response, 404, {
-                message:"Invalid credentials. (username)"
+                message:"Invalid credentials."
             })
         }
 
         /** If user is found with the email address, we need to check for their password if it correct */
+        // TODO: QA Validating Correct Password after sign up is done!
         if(!bcrypt.compareSync(password, existUser.ACCOUNT_PASSWORD)) {
             return responseBuilder.BuildResponse(response, 404, {
-                message:"Invalid credentials. (password)"
+                message:"Invalid credentials."
             })
         }
         

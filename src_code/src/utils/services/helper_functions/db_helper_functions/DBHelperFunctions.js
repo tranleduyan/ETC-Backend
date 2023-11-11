@@ -3,7 +3,7 @@ async function GetUserInfoBasedOnEmailAddress(db, emailAddress){
         /** Initailize an user object query from database */
         const user = await db.select(
             "PK_USER_ID",
-            "FK_CDE_ROLE", 
+            "USER_ROLE", 
             "FIRST_NAME",
             "MIDDLE_NAME",
             "LAST_NAME",
@@ -17,13 +17,10 @@ async function GetUserInfoBasedOnEmailAddress(db, emailAddress){
             return null;
         }
 
-        /** Get user role description */
-        const userRole = await db.select("DESC_ROLE").from("user_role").where("PK_CDE_ROLE", "=", user.FK_CDE_ROLE).first();  
-
         /** If there is user, then we return there information */
         const responseObject = {
             userId: user.PK_USER_ID,
-            userRole: userRole.DESC_ROLE,
+            userRole: user.USER_ROLE,
             firstName: user.FIRST_NAME,
             middleName: user.MIDDLE_NAME,
             lastName: user.LAST_NAME,
