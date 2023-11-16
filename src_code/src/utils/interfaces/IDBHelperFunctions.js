@@ -1,7 +1,8 @@
 /** Initialize neccessary module */
-const dbHelperFunctions = require("../services/helper_functions/db_helper_functions/DBHelperFunctions");
+const userDBHelperFunctions = require("../services/helper_functions/db_helper_functions/UserDBHelperFunctions");
 
 /** Exports the functions */
 module.exports = {
-    GetUserInfoBasedOnEmailAddress: dbHelperFunctions.GetUserInfoBasedOnEmailAddress,
+    GetUserInfoByEmailAddress: userDBHelperFunctions.GetUserInfoByEmailAddress,
+    GetUserInfoByStudentId: userDBHelperFunctions.GetUserInfoByStudentId
 }
