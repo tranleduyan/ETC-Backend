@@ -121,7 +121,7 @@ async function SignUpValidation(res, req) {
 
             /** If there is already an user with the sign up student id, return bad request */
             if(isUserWithRequestStudentId) {
-                return responseBuilder.BadRequest(res, "You have sign up an account with this student ID already.");
+                return responseBuilder.BadRequest(res, "Student ID is already used.");
             }
         }
 
