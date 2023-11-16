@@ -1,0 +1,94 @@
+/** Initialize neccessary modules */
+const responseBuilder = require("../../../utils/interfaces/IResponseBuilder");
+const helpers = require("../../../utils/interfaces/IHelperFunctions");
+
+/**
+ * Handle sending verification code to an email address
+ * @param {object} res - The response object for the HTTP request.
+ * @param {object} req - The request object from the HTTP request.
+ * @returns {object} - This response object indicates the result of the sending verification code attempt.
+ */
+async function SendVerificationCode(res, req) {
+    try{
+        /** Validating before actual perform */
+        const errors = await VerificationCodeValidation(res, req);
+        if(errors) {
+            return errors;
+        }
+        
+        /** Destructure variables from the request body */
+        const {firstName, lastName, emailAddress, verificationCode} = req;
+
+        /** Try send verification code, if failed, it will be store in sendVerificationCodeErrorMessage variable */
+        const sendVerificationCodeErrorMessage = await helpers.SendVerificationCode(firstName, lastName, emailAddress, verificationCode);
+        
+        /** If failed sending verification due to some error, return bad request */
+        if(sendVerificationCodeErrorMessage) {
+            /** Capture the error */
+            console.log(sendVerificationCodeErrorMessage);
+            return responseBuilder.BadRequest(res, "There is an error while sending code to your email. Please try again later.");
+        }
+
+        /** Success response */
+        return responseBuilder.BuildResponse(res, 200, {
+            message: "A verification code sent to your email address. Please check inbox and spam folder.",
+        });
+    } catch(error) {
+        /** If there is some unexpected error, return log, and error */
+        console.log("ERROR: There is an error occurred while sending verification code: ", error);
+        return responseBuilder.ServerError(res, "Sorry, an error occur while sending verification code.");
+    }
+}
+
+/**
+ * Handle validating before sending verification code, to avoid unexpected error (503).
+ * @param {object} res - The response object for the HTTP request.
+ * @param {object} req - The request object from the HTTP request.
+ * @returns {object} response - the bad request response if failed validation, otherwise null.
+ */
+async function VerificationCodeValidation(res, req) {
+    try {
+        /** Declare a email pattern ends with @spu.edu (regex) */
+        const emailPattern = /.+@spu\.edu$/;
+
+        /** Destructure variables from request body */
+        const {firstName, lastName, emailAddress, verificationCode} = req;
+
+        /** If required fields are missing, return missing content */
+        if(!firstName || !lastName || !emailAddress || !verificationCode) {
+            return responseBuilder.MissingContent(res);
+        }
+
+        /** Validate ensure firstName and lastName should be less than 25 characters (Database restriction) */
+        if(firstName.length > 25 || lastName.length > 25) {
+            return responseBuilder.BadRequest(res, "First name and last name must be less than 25 characters.");
+        }
+
+        /** Ensure email is always @spu.edu domain */
+        if(!emailPattern.test(emailAddress.trim())) {
+            return responseBuilder.BadRequest(res, "Invalid email address. Please try again.");
+        }
+
+        /** Ensure that the verification code is valid. Should be four in length and a string type */
+        if(verificationCode.length !== 4 || !/^[0-9]+$/.test(verificationCode)) {
+            /** If verificationCode is not a string, then return bad request */
+            if(typeof verificationCode !== "string") {
+                return responseBuilder.BadRequest(res, "Invalid type of verification code. Please try again.");
+            } 
+            /** Return bad request for all bad format verification code */
+            return responseBuilder.BadRequest(res, "Invalid verification code. Please try again.");
+        }
+
+        /** Return null to indicate pass the validation */
+        return null;
+    } catch(error) {
+        /** If there is unexpected error, we catch it, log and return error */
+        console.log("ERROR: There is an error occurred while validating sending verification code: ", error);
+        return responseBuilder.ServerError(res, "There is an error occurr while validating sending verification code.");
+    }
+}
+
+/** Exports the module/functions */
+module.exports = {
+    SendVerificationCode
+}

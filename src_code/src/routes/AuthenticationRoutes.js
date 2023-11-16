@@ -25,6 +25,7 @@ router.post('/sign-in', async(request, response) => {
         return responseBuilder.ServerError(response, "There is an error while sign in.");
     }
 })
+
 /**
  *  POST/SIGN UP 
  *  URL => /api/authentication/sign-up
@@ -39,10 +40,32 @@ router.post("/sign-up", async(req, res) => {
         return await authenticationServices.SignUp(res, req.body);
     }catch(error){
         /** If error, return log and response with server error message */
-        console.log("ERROR: There is an error occur during signing in: ", error);
+        console.log("ERROR: There is an error occur while signing up: ", error);
         return responseBuilder.ServerError(
         res,
-        "Sorry, an error occur during signing in."
+        "Sorry, an error occur while signing up."
+        );
+    }
+})
+
+/**
+ *  POST/SEND VERIFICATION CODE
+ *  URL => /api/authentication/send-verification-code
+ */
+router.post("/send-verification-code", async(req, res) => {
+    try{
+         /** If there is no request body, return missing request body */
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return responseBuilder.MissingContent(res, "RB");
+        }
+        /** return response to the client */
+        return await authenticationServices.SendVerificationCode(res, req.body);
+    }catch(error){
+        /** If error, return log and response with server error message */
+        console.log("ERROR: There is an error occur while sending verification code: ", error);
+        return responseBuilder.ServerError(
+        res,
+        "Sorry, an error occur while sending verification code."
         );
     }
 })

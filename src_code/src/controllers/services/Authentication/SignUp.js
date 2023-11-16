@@ -54,7 +54,7 @@ async function SignUp(res, req) {
             MIDDLE_NAME: middleName.trim(),
             LAST_NAME: lastName.trim(),
             STUDENT_ID: req.studentId,
-            EMAIL_ADDRESS: emailAddress.toLowerCase().trim(),
+            EMAIL_ADDRESS: emailAddress.trim(),
             ACCOUNT_PASSWORD: encryptedPassword,
         }
 
@@ -98,6 +98,13 @@ async function SignUpValidation(res, req) {
             return responseBuilder.BadRequest(res, "Invalid user role.")
         }
 
+        if(firstName.length > 25) {
+            return responseBuilder.BadRequest(res, "First name is longer than 25 characters.");
+        }
+
+        if(lastName.length > 25) {
+            return responseBuilder.BadRequest(res, "Last name is longer than 25 characters.");
+        }
 
         if(req.studentId && req.studentId.length > 0){
             /** Verifying if the student id is valid */
@@ -129,7 +136,7 @@ async function SignUpValidation(res, req) {
         }
 
         /** Retrieve user with the sign up email address to check for the uniqueness */
-        const isUserWithRequestEmail = await dbHelper.GetUserInfoByEmailAddress(db, emailAddress.toLowerCase().trim());
+        const isUserWithRequestEmail = await dbHelper.GetUserInfoByEmailAddress(db, emailAddress.trim());
 
         if(isUserWithRequestEmail && typeof isUserWithRequestEmail === "string") {
             return responseBuilder.BadRequest(res, isUserWithRequestEmail);
@@ -148,6 +155,7 @@ async function SignUpValidation(res, req) {
     }
 }
 
+/** Exports the module/functions */
 module.exports = {
     SignUp,
     SignUpValidation

@@ -13,7 +13,7 @@ const bcrypt = require('bcryptjs');
 async function SignIn(response, requestBody) {
     try {
         /** Validate sign in body to see if information they request to our endpoint is valid */
-        const errors = await SignInValidator(response, requestBody);
+        const errors = await SignInValidation(response, requestBody);
         if(errors) {
             return errors;
         }
@@ -42,7 +42,13 @@ async function SignIn(response, requestBody) {
     }
 }
 
-async function SignInValidator(response, requestBody) {
+/**
+ * Handle validation before actually perform sign in
+ * @param {object} response - the response object for the HTTP request.
+ * @param {object} requestBody - the body of the request containing sign in details.
+ * @returns {object} response - if failed validation, send back to client bad request response, otherwise null.
+ */
+async function SignInValidation(response, requestBody) {
     try{
         /** Destructure variables from the request body */
         const {emailAddress, password} = requestBody;
@@ -78,6 +84,8 @@ async function SignInValidator(response, requestBody) {
     }
 }
 
+/** Exports the module/functions */
 module.exports = {
     SignIn,
+    SignInValidation
 }
