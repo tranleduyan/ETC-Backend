@@ -1,6 +1,8 @@
 /** Initialize neccessary modules */
 const responseBuilder = require("../../../utils/interfaces/IResponseBuilder");
 const helpers = require("../../../utils/interfaces/IHelperFunctions");
+const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
+const db = require("../../../configurations/database/DatabaseConfigurations");
 
 /**
  * Handle sending verification code to an email address
@@ -55,10 +57,23 @@ async function VerificationCodeValidation(res, req) {
         const {firstName, lastName, emailAddress, verificationCode} = req;
 
         /** If required fields are missing, return missing content */
-        if(!firstName || !lastName || !emailAddress || !verificationCode) {
+        if((req.isNewAccount === undefined || req.isNewAccount === null) || !firstName || !lastName || !emailAddress || !verificationCode) {
             return responseBuilder.MissingContent(res);
         }
 
+        /** If type of isNewAccount is not a bool, return bad request */
+        if(typeof req.isNewAccount !== "boolean"){
+            return responseBuilder.BadRequest(res, "Invalid type in request body.");
+        }
+
+        /** If the request is for newAccount (Sign Up), help client check emailAddress existence */
+        if(req.isNewAccount === true) {
+            const user = await dbHelper.GetUserInfoByEmailAddress(db, emailAddress);
+            if(user) {
+                return responseBuilder.BadRequest(res, "Email address is already used.");
+            }
+        }
+        
         /** Validate ensure firstName and lastName should be less than 25 characters (Database restriction) */
         if(firstName.length > 25 || lastName.length > 25) {
             return responseBuilder.BadRequest(res, "First name and last name must be less than 25 characters.");
