@@ -10,7 +10,7 @@ async function GetUserInfoByEmailAddress(db, emailAddress){
             "STUDENT_ID",
             "EMAIL_ADDRESS",
             "TAG_ID",
-        ).from("user_info").where("EMAIL_ADDRESS", "=", emailAddress.toLowerCase().trim()).first();
+        ).from("user_info").where("EMAIL_ADDRESS", "=", emailAddress.trim()).first();
 
         /** If emailAddress is not exists, then the user is not exist */
         if(!user) {
@@ -48,11 +48,17 @@ async function GetUserInfoByEmailAddress(db, emailAddress){
 async function GetUserInfoByStudentId(db, studentId) {
     try{
         /** Initialize an object by query to get user information */
-        const user = await db("user_account")
-            .select()
-            .where("STUDENT_ID", "=", studentId.trim())
-            .first();
-        
+        const user = await db.select(
+            "PK_USER_ID",
+            "USER_ROLE", 
+            "FIRST_NAME",
+            "MIDDLE_NAME",
+            "LAST_NAME",
+            "STUDENT_ID",
+            "EMAIL_ADDRESS",
+            "TAG_ID",
+        ).from("user_info").where("STUDENT_ID", "=", studentId.trim()).first();
+
         /** If there is no user, return null */
         if(!user) {
             return null;
