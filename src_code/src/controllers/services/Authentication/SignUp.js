@@ -83,8 +83,9 @@ async function SignUpValidation(res, req) {
         /** Declare a email pattern ends with @spu.edu (regex) */
         const emailPattern = /.+@spu\.edu$/;
 
-        /** Declare a number pattern (regex) */
-        const numPattern = /^[\d]+$/;
+        /** Declare a studentID pattern */
+        const studentIDPattern = /^900\d{6}$/;
+
 
         /** Destructure variables from the request body */
         const {userRole, firstName, lastName, studentId, emailAddress, accountPassword } = req;
@@ -108,7 +109,7 @@ async function SignUpValidation(res, req) {
 
         if(req.studentId && req.studentId.length > 0){
             /** Verifying if the student id is valid */
-            if(req.studentId.length !== 9 || !numPattern.test(req.studentId)) {
+            if(req.studentId.length !== 9 || !studentIDPattern.test(req.studentId)) {
                 return responseBuilder.BadRequest(res, "Invalid student ID.");
             }
 
