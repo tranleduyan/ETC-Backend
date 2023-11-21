@@ -17,7 +17,7 @@ router.post('/sign-in', async(request, response) => {
             return responseBuilder.MissingContent(response, "RB");
         } 
         /** If request body is exist, then we perform sign in based on request body */
-        return await authenticationServices.SignIn(response, request.body);
+        return await Promise.resolve(authenticationServices.SignIn(response, request.body));
     }catch(error){
         /** Logging unexpected error. help for debug */
         console.log("ERROR: There is an error while signing-in: ", error);
@@ -37,9 +37,9 @@ router.post("/sign-up", async(req, res) => {
             return responseBuilder.MissingContent(res, "RB");
         }
         /** return response to the client */
-        return await authenticationServices.SignUp(res, req.body);
+        return await Promise.resolve(authenticationServices.SignUp(res, req.body));
     }catch(error){
-        /** If error, return log and response with server error message */
+        /** If error, return log to cloudwatch and response with server error status code 503 message (more on the code see responsive builder) */
         console.log("ERROR: There is an error occur while signing up: ", error);
         return responseBuilder.ServerError(
         res,
@@ -59,9 +59,9 @@ router.post("/send-verification-code", async(req, res) => {
             return responseBuilder.MissingContent(res, "RB");
         }
         /** return response to the client */
-        return await authenticationServices.SendVerificationCode(res, req.body);
+        return await Promise.resolve(authenticationServices.SendVerificationCode(res, req.body));
     }catch(error){
-        /** If error, return log and response with server error message */
+        /** If error, return log to cloudwatch and response with server error message status code 503 */
         console.log("ERROR: There is an error occur while sending verification code: ", error);
         return responseBuilder.ServerError(
         res,

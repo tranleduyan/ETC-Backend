@@ -7,13 +7,29 @@ const bcrypt = require('bcryptjs');
 /** 
  *  Handle user sign-in.
  *  @param {object} response - the response object for the HTTP request.
- *  @param {object} requestBody - the body of the request containing sign in details (username and password).
+ *  @param {object} requestBody - the body of the request containing sign in details (email address and password).
  *  @returns {object} A response object showing whether request is success or not.
+ * 
+ * Expected Body Request:
+ * emailAddress: "xxx@spu.edu",
+ * password: "xxx",
+ * 
+ * Response Body with status code 200:
+ * userId: x,
+ * userRole: "Student/Faculty/Admin",
+ * firstName: "Aaron",
+ * middleName: "",
+ * lastName: "Tran",
+ * schoolId: xxxxxxxxx,
+ * email: xxx@spu.edu,
+ * tagId: null for now
+ * 
+ * If error, catch it and log to cloudwatch, send to the client server error status code of 503 to render.
  */
 async function SignIn(response, requestBody) {
     try {
         /** Validate sign in body to see if information they request to our endpoint is valid */
-        const errors = await SignInValidation(response, requestBody);
+        const errors = await Promise.resolve(SignInValidation(response, requestBody));
         if(errors) {
             return errors;
         }

@@ -1,3 +1,9 @@
+/**
+ * This function is used to retrieved information of an user by their email address.
+ * @param {object} db - the knex object configurations, allow us to open connection and communicate with mysql. 
+ * @param {string} emailAddress - the email address of the user we want to retrieve the information.
+ * @returns {object} responseObject - the user object include user's information.
+ */
 async function GetUserInfoByEmailAddress(db, emailAddress){ 
     try {
         /** Initailize an user object query from database */
@@ -7,7 +13,7 @@ async function GetUserInfoByEmailAddress(db, emailAddress){
             "FIRST_NAME",
             "MIDDLE_NAME",
             "LAST_NAME",
-            "STUDENT_ID",
+            "SCHOOL_ID",
             "EMAIL_ADDRESS",
             "TAG_ID",
         ).from("user_info").where("EMAIL_ADDRESS", "=", emailAddress.trim()).first();
@@ -24,7 +30,7 @@ async function GetUserInfoByEmailAddress(db, emailAddress){
             firstName: user.FIRST_NAME,
             middleName: user.MIDDLE_NAME,
             lastName: user.LAST_NAME,
-            studentID: user.STUDENT_ID,
+            schoolId: user.SCHOOL_ID,
             email: user.EMAIL_ADDRESS,
             tagId: user.TAG_ID
         }
@@ -40,12 +46,12 @@ async function GetUserInfoByEmailAddress(db, emailAddress){
 }
 
 /**
- * This function is used to retrieved information of an user by their student id.
+ * This function is used to retrieved information of an user by their school id.
  * @param {object} db - the knex object configurations, allow us to open connection and communicate with mysql. 
- * @param {string} studentId - the student id of the user we want to retrieve the information.
+ * @param {string} schoolId - the school id of the user we want to retrieve the information.
  * @returns {object} responseObject - the user object include user's information.
  */
-async function GetUserInfoByStudentId(db, studentId) {
+async function GetUserInfoBySchoolId(db, schoolId) {
     try{
         /** Initialize an object by query to get user information */
         const user = await db.select(
@@ -54,10 +60,10 @@ async function GetUserInfoByStudentId(db, studentId) {
             "FIRST_NAME",
             "MIDDLE_NAME",
             "LAST_NAME",
-            "STUDENT_ID",
+            "SCHOOL_ID",
             "EMAIL_ADDRESS",
             "TAG_ID",
-        ).from("user_info").where("STUDENT_ID", "=", studentId.trim()).first();
+        ).from("user_info").where("SCHOOL_ID", "=", schoolId.trim()).first();
 
         /** If there is no user, return null */
         if(!user) {
@@ -71,7 +77,7 @@ async function GetUserInfoByStudentId(db, studentId) {
             firstName: user.FIRST_NAME,
             middleName: user.MIDDLE_NAME,
             lastName: user.LAST_NAME,
-            studentId: user.STUDENT_ID,
+            schoolId: user.SCHOOL_ID,
             emailAddress: user.EMAIL_ADDRESS,
             tagId: user.TAG_ID
         }
@@ -80,7 +86,7 @@ async function GetUserInfoByStudentId(db, studentId) {
         return responseObject;
     } catch(error) {
         /** Logging error, easy to debug */
-        console.log("ERROR: There is an error while retrieving user information based on student id: ", error); 
+        console.log("ERROR: There is an error while retrieving user information based on school id: ", error); 
         /** Return error message string */
         return "There is an error occur."
     }
@@ -89,5 +95,5 @@ async function GetUserInfoByStudentId(db, studentId) {
 
 module.exports ={
     GetUserInfoByEmailAddress,
-    GetUserInfoByStudentId
+    GetUserInfoBySchoolId
 }
