@@ -26,3 +26,5 @@ app.listen(PORT, (err) => {
     console.log(`SERVER IS RUNNING ON PORT ${PORT}.`);
   }
 });
+
+module.exports = app;
