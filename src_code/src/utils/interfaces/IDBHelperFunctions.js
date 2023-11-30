@@ -2,6 +2,7 @@
 const userDBHelperFunctions = require("../services/helper_functions/db_helper_functions/user/UserDBHelperFunctions");
 const typeDBHelperFunctions = require("../services/helper_functions/db_helper_functions/type/TypeDBHelperFunctions");
 const modelDBHelperFunctions = require("../services/helper_functions/db_helper_functions/model/ModelDBHelperFunctions");
+const equipmentDBHelperFunctions = require("../services/helper_functions/db_helper_functions/equipment/EquipmentDBHelperFunctions");
 
 /** Exports the functions */
 module.exports = {
@@ -11,5 +12,8 @@ module.exports = {
     AddTypeToDatabase: typeDBHelperFunctions.AddTypeToDatabase,
     GetTypeInfoByTypeId: typeDBHelperFunctions.GetTypeInfoByTypeId,
     GetModelInfoByModelId: modelDBHelperFunctions.GetModelInfoByModelId,
-    GetEquipmentAvailableCount: modelDBHelperFunctions.GetEquipmentAvailableCount
+    GetEquipmentAvailableCount: modelDBHelperFunctions.GetEquipmentAvailableCount,
+    GetModelById: userDBHelperFunctions.GetModelById,
+    GetTypeById: typeDBHelperFunctions.GetTypeById,
+    GetEquipmentBySerialId: equipmentDBHelperFunctions.GetEquipmentBySerialId
 }

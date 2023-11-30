@@ -12,10 +12,60 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 /**
- *  POST/EQUIPMENT REMOVE
- *  URL => /api/inventory/remove
+ *  POST/ADD EQUIPMENT
+ *  URL => /api/inventory/equipment
+ *  requestBody:
+ *  {
+ *      "schoolId": string,
+ *      "serialId": string,
+ *      "typeId": int,
+ *      "modelId": int,
+ *      "maintenanceStatus": string,
+ *      "reservationStatus": string,
+ *      "usageCondition": string,
+ *      "purchaseCost": double (optional),
+ *      "purchaseDate": date (optional)
+ *  }
+ * 
+ *  @return 400 (Failed Validation): 
+ *  {
+ *      "message": string
+ *  }
+ *  @return 503 (Server Error):
+ *  {
+ *      "message":  "There is an error occur while retrieving type information." / "There is an error while adding equipment."
+ *  }
+ *  @return 200:
+ *  {
+ *      "message": "New type added successfully.",
+ *      "responseObject": {
+ *           typeId: int,
+ *           typeName: string,
+ *      },
+ *  }
  */
-router.post('/remove', async(request, response) => {
+router.post('/equipment', async(request, response) => {
+    try{
+        /** If there is no request body, then we return the request body is empty */
+        if(!request.body || Object.keys(request.body).length === 0) {
+            /** Return request body is empty */
+            return responseBuilder.MissingContent(response, "RB");
+        } 
+        /** If request body is exist, then we perform sign in based on request body */
+        return await Promise.resolve(inventoryServices.EquipmentAddition(response, request.body));
+    }catch(error){
+        /** Logging unexpected error. help for debug */
+        console.log("ERROR: There is an error while adding equipment: ", error);
+        /** Response error message to the client */
+        return responseBuilder.ServerError(response, "There is an error while adding equipment.");
+    }
+})
+
+/**
+ *  DELETE/EQUIPMENT REMOVE
+ *  URL => /api/inventory/equipment
+ */
+router.delete('/equipment', async(request, response) => {
     try{
         return await Promise.resolve(inventoryServices.EquipmentRemoval(response, request.body));
     }catch(error){
