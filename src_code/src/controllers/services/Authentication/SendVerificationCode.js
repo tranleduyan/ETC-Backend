@@ -130,7 +130,7 @@ async function NewAccountValidator(res, emailAddress, schoolId){
     const numPattern = /^\d+$/;
     
     /** Check if email address is already in use */
-    const isEmailExist = await dbHelper.GetUserInfoByEmailAddress(db, emailAddress);
+    const isEmailExist = await Promise.resolve(dbHelper.GetUserInfoByEmailAddress(db, emailAddress));
     if(isEmailExist && typeof isEmailExist === "string"){
         return responseBuilder.BadRequest(res, isEmailExist);
     }

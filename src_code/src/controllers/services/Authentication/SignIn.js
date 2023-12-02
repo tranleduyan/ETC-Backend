@@ -38,7 +38,7 @@ async function SignIn(response, requestBody) {
         const {emailAddress} = requestBody;
 
         /** Get user information based on emailAddress */
-        const userInfo = await dbHelper.GetUserInfoByEmailAddress(db, emailAddress.toLowerCase().trim());
+        const userInfo = await Promise.resolve(dbHelper.GetUserInfoByEmailAddress(db, emailAddress.toLowerCase().trim()));
 
         /** If userInfo is a string, which means it is an error message */
         if(typeof userInfo === "string") {
