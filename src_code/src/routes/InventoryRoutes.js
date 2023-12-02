@@ -62,6 +62,47 @@ router.post('/equipment', async(request, response) => {
 })
 
 /**
+ * PUT/UPDATE EQUIPMENT
+ * URL => /api/inventory/equipment/{serialId}
+ * requestBody:
+ *  {
+ *      "schoolId": string,
+ *      "typeId": int (optional),
+ *      "modelId": int (optional),
+ *      "maintenanceStatus": string (optional),
+ *      "reservationStatus": string (optional),
+ *      "usageCondition": string (optional),
+ *      "purchaseCost": double (optional),
+ *      "purchaseDate": date (optional)
+ *  }
+ * 
+ * @return 404 or 400 if failed validation
+ * @return 503 if server error
+ * @return 200 OK 
+ * {
+ *      "message":"Equipment updated successfully."
+ * }
+ */
+router.put('/equipment/:serialId', async(request, response) => {
+    try {
+        /** If there is no request body, then we return the request body is empty */
+        if(!request.body || Object.keys(request.body).length === 0) {
+            /** Return request body is empty */
+            return responseBuilder.MissingContent(response, "RB");
+        }
+        /** Retrieve serial id of the requested update equipment */
+        const serialId = request.params.serialId;
+        /** Perform update equipment */
+        return await Promise.resolve(inventoryServices.EquipmentUpdate(response, request.body, serialId));
+    } catch(error) {
+        /** Logging unexpected error. help for debug */
+        console.log("ERROR: There is an error while updating equipment:", error);
+        /** Response error message to the client */
+        return responseBuilder.ServerError(response, "There is an error while updating equipment.");
+    }
+});
+
+/**
  *  DELETE/EQUIPMENT REMOVE
  *  URL => /api/inventory/equipment
  *  requestBody:

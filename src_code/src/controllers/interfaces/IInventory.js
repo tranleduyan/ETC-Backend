@@ -1,5 +1,6 @@
 /** Initialize neccessary modules */
 const EquipmentAdditionService = require('../services/Inventory/EquipmentAddition');
+const UpdateEquipmentService = require('../services/Inventory/EquipmentUpdate');
 const EquipmentRemovalService = require('../services/Inventory/EquipmentRemoval');
 const ModelAdditionService = require('../services/Inventory/ModelAddition');
 const TypeAdditionService = require('../services/Inventory/TypeAddition');
@@ -19,6 +20,7 @@ const GetEquipmentInformationServices = require("../services/Inventory/GetEquipm
 /** Exports the module */
 module.exports = {
     EquipmentAddition: EquipmentAdditionService.EquipmentAddition,
+    EquipmentUpdate: UpdateEquipmentService.EquipmentUpdate,
     EquipmentRemoval: EquipmentRemovalService.EquipmentRemoval,
     ModelAddition: ModelAdditionService.ModelAddition,
     TypeAddition: TypeAdditionService.TypeAddition,
