@@ -7,7 +7,7 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  *
  * @param {object} res - The response object for the HTTP request.
  * @param {object} req - The request object from the HTTP request.
- * @returns {object} - This response object indicates the result of the update attempt.
+ * @returns {object} - This response object indicates the result of the type addition attempt.
  * 
  * Expected Request Body: 
  * {
