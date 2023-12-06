@@ -1,3 +1,7 @@
+<p align="left">
+  <img src="src/assets/ETClogo.png" alt="Logo" width="75" height="75">
+</p>
+
 # ETC-Backend
 
 ## About
