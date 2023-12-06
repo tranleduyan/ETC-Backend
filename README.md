@@ -1,5 +1,5 @@
 <p align="left">
-  <img src="src/assets/ETClogo.png" alt="Logo" width="75" height="75">
+  <img src="src_code/src/assets/ETCLogo.png" alt="Logo" width="75" height="75">
 </p>
 
 # ETC-Backend
