@@ -1,9 +1,9 @@
-const EqipmentRemovalService = require('../services/Inventory/EquipmentRemoval');
+const EquipmentRemovalService = require('../services/Inventory/EquipmentRemoval');
 const ModelAdditionService = require('../services/Inventory/ModelAddition');
 const TypeAdditionService = require('../services/Inventory/TypeAddition');
 
 module.exports = {
-    EqipmentRemoval: EqipmentRemovalService.EqipmentRemoval,
+    EquipmentRemoval: EquipmentRemovalService.EquipmentRemoval,
     ModelAddition: ModelAdditionService.ModelAddition,
     TypeAddition: TypeAdditionService.TypeAddition,
 }
