@@ -1,3 +1,4 @@
+/** Initialize neccessary modules */
 const EquipmentRemovalService = require('../services/Inventory/EquipmentRemoval');
 const ModelAdditionService = require('../services/Inventory/ModelAddition');
 const TypeAdditionService = require('../services/Inventory/TypeAddition');
