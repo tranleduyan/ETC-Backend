@@ -1,3 +1,4 @@
+/** Initialize neccessary modules */
 const responseBuilder = require("../../../utils/interfaces/IResponseBuilder");
 const db = require("../../../configurations/database/DatabaseConfigurations");
 const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
@@ -27,10 +28,10 @@ async function TypeAddition(res, req) {
         }
 
         /** If validation pass, we need to destructure variable typeName from the request body for use. */
-        const {equipment_type_name} = req;
+        const { equipment_type_name } = req;
 
         /** If the type does not exist, add it to the database */
-        const addedType = await dbHelper.AddTypeToDatabase(db, equipment_type_name);
+        const addedType = await Promise.resolve(dbHelper.AddTypeToDatabase(db, equipment_type_name));
 
         if(typeof addedType === "string"){
             return responseBuilder.ServerError(res, addedType);
@@ -58,7 +59,7 @@ async function TypeAddition(res, req) {
 async function TypeAdditionValidation(res, req) {
     try{
         /** Destructure variables from the request body */
-        const {equipment_type_name} = req;
+        const { equipment_type_name } = req;
         
         /** Check if user is filled in required fields */
         if(!equipment_type_name) {
@@ -66,7 +67,7 @@ async function TypeAdditionValidation(res, req) {
         }
 
         /** Check if type name is exists (or already added) */
-        const existType = await dbHelper.GetTypeInfoByName(db, equipment_type_name);
+        const existType = await Promise.resolve(dbHelper.GetTypeInfoByName(db, equipment_type_name));
 
         if(existType) {
            return typeof existType === "string" ? 
@@ -78,6 +79,7 @@ async function TypeAdditionValidation(res, req) {
     } catch(error){
         /** Logging unexpected error, help for debug */
         console.log("ERROR: There is an error while validating add type: ", error);
+        
         /** Return error message to the client */
         return responseBuilder.ServerError(res, "There is an error while validating add type.");
     }
