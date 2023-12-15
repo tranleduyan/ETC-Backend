@@ -50,6 +50,27 @@ router.post('/model-add', async(request, response) => {
 /**
  *  POST/TYPE ADDITION
  *  URL => /api/inventory/type-add
+ *  requestBody: 
+ *  {
+ *      "equipment_type_name": string
+ *  }
+ * 
+ *  @return 400 (Failed Validation): 
+ *  {
+ *      "message":"Type already exists."
+ *  }
+ *  @return 503 (Server Error):
+ *  {
+ *      "message":  "There is an error occur while retrieving type information." / "There is an error occur while adding type."
+ *  }
+ *  @return 200:
+ *  {
+ *      "message": "New type added successfully.",
+ *      "responseObject": {
+ *           typeId: int,
+ *           typeName: string,
+ *      },
+ *  }
  */
 router.post('/type-add', async(request, response) => {
     try{
