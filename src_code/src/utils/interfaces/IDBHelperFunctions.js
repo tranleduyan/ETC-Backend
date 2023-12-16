@@ -4,5 +4,7 @@ const userDBHelperFunctions = require("../services/helper_functions/db_helper_fu
 /** Exports the functions */
 module.exports = {
     GetUserInfoByEmailAddress: userDBHelperFunctions.GetUserInfoByEmailAddress,
-    GetUserInfoBySchoolId: userDBHelperFunctions.GetUserInfoBySchoolId
+    GetUserInfoBySchoolId: userDBHelperFunctions.GetUserInfoBySchoolId,
+    GetTypeInfoByName: userDBHelperFunctions.GetTypeInfoByName,
+    AddTypeToDatabase: userDBHelperFunctions.AddTypeToDatabase
 }
