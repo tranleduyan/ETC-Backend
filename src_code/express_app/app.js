@@ -14,7 +14,8 @@ const authenticationRoutes = require('../src/routes/AuthenticationRoutes');
 const inventoryRoutes = require('../src/routes/InventoryRoutes');
 
 /** Define the port */
-const PORT = 5000;
+// const PORT = 5000;
+const PORT = 5001; //for development purposes
 
 /** Use the routes (Middleware) */
 app.use("/api/authentication", authenticationRoutes);
