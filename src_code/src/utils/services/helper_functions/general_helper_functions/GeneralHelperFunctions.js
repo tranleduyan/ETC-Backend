@@ -76,7 +76,64 @@ async function SendVerificationCode(firstName, lastName, emailAddress, verificat
     }
 }
 
+/**
+ * Generates a public URL for an image stored on Google Drive using the provided Drive file ID.
+ * @param {object} drive - The Google Drive API instance.
+ * @param {string} imageDriveFileId - The file ID of the image on Google Drive.
+ * @returns {Promise<string|null>} - A promise resolving to the public URL of the image on success or an error message on failure.
+ */
+async function GenerateDriveImagePublicUrl(drive, imageDriveFileId) {
+    try{
+        /** Set permission of the image to public */
+        await drive.permissions.create({
+            fileId: imageDriveFileId,
+            requestBody: {
+              role: "reader",
+              type: "anyone",
+            },
+        });
+
+        /** Once set the image to public, retrieve its data (include the image public url) */
+        const imageUrl = `https://drive.google.com/uc?id=${imageDriveFileId}`;
+
+        /** Return the image public url */
+        return imageUrl;
+    } catch(error) {
+        /** Log the error and return null to indicate no image url is generated */
+        console.log("ERROR: There is an error while generating drive image url: ", error);
+        return null;
+    }
+}
+
+/**
+ * Deletes an image from Google Drive using the provided Drive file ID.
+ * @param {object} drive - The Google Drive API instance.
+ * @param {string} imageDriveFileId - The file ID of the image on Google Drive.
+ * @returns {Promise<null|string>} - A promise resolving to null on success or an error message on failure.
+ */
+async function DeleteDriveImage(drive, imageDriveFileId) {
+    try {
+      if(!imageDriveFileId) {
+        return null;
+      }
+      
+      /** Attempt to delete the image from Google Drive */
+      await drive.files.delete({
+        fileId: imageDriveFileId,
+      });
+  
+      /** Return null on successful deletion */
+      return null;
+    } catch (error) {
+      /** Log the error and return an error message */
+      console.log("ERROR: There is an error occur while deleting image: ", error);
+      return "An error occurs while processing the data.";
+    }
+  }
+  
 /** Exports the module/functions */
 module.exports = {
-    SendVerificationCode
+    SendVerificationCode,
+    GenerateDriveImagePublicUrl,
+    DeleteDriveImage,
 }

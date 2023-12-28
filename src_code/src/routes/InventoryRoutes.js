@@ -2,8 +2,14 @@
 const express = require('express');
 const responseBuilder = require('../utils/interfaces/IResponseBuilder');
 const inventoryServices = require('../controllers/interfaces/IInventory');
+const multer = require("multer");
+
 /** Initialize router for the route */
 const router = express.Router();
+
+/** Set up multer for handling file uploads */
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 /**
  *  POST/EQUIPMENT REMOVE
@@ -11,12 +17,6 @@ const router = express.Router();
  */
 router.post('/remove', async(request, response) => {
     try{
-        /** If there is no request body, then we return the request body is empty */
-        if(!request.body || Object.keys(request.body).length === 0) {
-            /** Return request body is empty */
-            return responseBuilder.MissingContent(response, "RB");
-        } 
-        /** If request body is exist, then we perform remove based on request body */
         return await Promise.resolve(inventoryServices.EquipmentRemoval(response, request.body));
     }catch(error){
         /** Logging unexpected error. help for debug */
@@ -30,15 +30,16 @@ router.post('/remove', async(request, response) => {
  *  POST/MODEL ADDITION
  *  URL => /api/inventory/model-add
  */
-router.post('/model-add', async(request, response) => {
+router.post('/model-add', upload.single('image'), async(request, response) => {
     try{
         /** If there is no request body, then we return the request body is empty */
         if(!request.body || Object.keys(request.body).length === 0) {
             /** Return request body is empty */
             return responseBuilder.MissingContent(response, "RB");
         } 
+
         /** If request body is exist, then we perform model add based on request body */
-        return await Promise.resolve(inventoryServices.ModelAddition(response, request.body));
+        return await Promise.resolve(inventoryServices.ModelAddition(response, request));
     }catch(error){
         /** Logging unexpected error. help for debug */
         console.log("ERROR: There is an error while model adding: ", error);
