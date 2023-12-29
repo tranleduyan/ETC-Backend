@@ -33,13 +33,17 @@ async function AddTool(res, req) {
         }
 
         /** If validation pass, we need to destructure variables (see above) from the request body for use. */
-        const { serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+        // TODO: get RFID/locaation info from request?
+        const { typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
 
         /** Prepare data for table insert */
+        // TODO: add RFID/location info to insert data
 		const insertData = {
-			PK_EQUIPMENT_SERIAL_ID: serialId.trim(),
+			PK_EQUIPMENT_SERIAL_ID: req.serialId,
 			FK_TYPE_ID: typeId,
 			FK_MODEL_ID: modelId,
+            FK_CURRENT_ROOM_READER_ID: null,
+            TAG_ID: null,
 			MAINTENANCE_STATUS: maintenanceStatus.trim(),
 			RESERVATION_STATUS: reservationStatus.trim(),
 			USAGE_CONDITION: usageCondition.trim(),
@@ -68,12 +72,39 @@ async function AddTool(res, req) {
  * @param {object} req - The body of the request containing add type details.
  * @returns {object} Response - if failed validation, send back to client bad request response, otherwise null.
  */
-async function TypeAdditionValidation(res, req) {
+async function AddToolValidation(res, req) {
     try{
         /** Destructure variables from the request body */
         const { serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
         
+        /** We check for all variables even though they are optional because we expect to have them in request body */
+        if(!serialId || !typeId || !modelId || !maintenanceStatus || !reservationStatus || !usageCondition || !purchaseCost || !purchaseDate) {
+            return responseBuilder.MissingContent(res);
+        }
         
+        /** Validate serial ID */
+        const serialIdError = await Promise.resolve(SerialIdValidator(res, serialId));
+        if(serialIdError) {
+            return serialIdError;
+        }
+
+        /** Validate tool maintenance status */
+        const maintenanceStatusError = MaintenanceStatusValidator(res, maintenanceStatus);
+        if(maintenanceStatusError) {
+            return maintenanceStatusError;
+        }
+
+        /** Validate tool reservation status */
+        const reservationStatusError = ReservationStatusValidator(res, reservationStatus);
+        if(reservationStatusError) {
+            return reservationStatusError;
+        }
+
+        /** Validate tool usage condition */
+        const usageConditionError = UsageConditionValidator(res, usageCondition);
+        if(usageConditionError) {
+            return usageConditionError;
+        }
         
         /** If all checks pass, return null to indicate validation success */
         return null;
@@ -86,8 +117,88 @@ async function TypeAdditionValidation(res, req) {
     }
 }
 
+/**
+ * Validates the serial ID.
+ *
+ * @param {object} res - The response object for the HTTP request.
+ * @param {string} serialId - The serial ID to be validated.
+ * @returns {object|null} - Returns a BadRequest response if validation fails, otherwise null.
+ */
+async function SerialIdValidator(res, serialId) {
+    const serialIdTemp = serialId.trim();
+
+    /** Validate the length of the serial ID. */
+    if(serialIdTemp.length > 30) {
+        return responseBuilder.BadRequest(res, "serial ID is longer than 30 characters.");
+    }
+
+    /** Retrieve tool with the serial ID to check for the uniqueness */
+    const toolWithSerialId = await dbHelper.GetToolBySerialId(db, serialIdTemp);
+
+    /** Check if the toolWithSerialId is not null and if it type is string, return bad request */
+    if(toolWithSerialId && typeof toolWithSerialId === "string") {
+        return responseBuilder.BadRequest(res, toolWithSerialId);
+    }
+
+    /** If there is already a tool with the serial ID, return bad request */
+    if(toolWithSerialId) { 
+        return responseBuilder.BadRequest(res,"The serial ID is already in use.");
+    }
+
+    /** Indicate pass the validation */
+    return null;
+}
+
+/**
+ * Validates the tool maintenance status (must be 'Ready' or 'Under Repair' only).
+ *
+ * @param {object} res - The response object for the HTTP request.
+ * @param {string} maintenanceStatus - The tool maintenance status to be validated.
+ * @returns {object|null} - Returns a BadRequest response if validation fails, otherwise null.
+ */
+function MaintenanceStatusValidator(res, maintenanceStatus) {
+    if(maintenanceStatus.trim() !== "Ready" && maintenanceStatus.trim() !== "Under Repair") {
+        return responseBuilder.BadRequest(res, "Invalid maintenance status.")
+    }
+
+    /** Indicate pass the validation */
+    return null;
+}
+
+/**
+ * Validates the tool reservation status (must be 'Available' OR 'In Use' only).
+ *
+ * @param {object} res - The response object for the HTTP request.
+ * @param {string} reservationStatus - The tool reservation status to be validated.
+ * @returns {object|null} - Returns a BadRequest response if validation fails, otherwise null.
+ */
+function ReservationStatusValidator(res, reservationStatus) {
+    if(reservationStatus.trim() !== "Available" && reservationStatus.trim() !== "In Use") {
+        return responseBuilder.BadRequest(res, "Invalid reservation status.")
+    }
+
+    /** Indicate pass the validation */
+    return null;
+}
+
+/**
+ * Validates the tool usage condition (must be 'Used' OR 'New' only).
+ *
+ * @param {object} res - The response object for the HTTP request.
+ * @param {string} usageCondition - The tool usage condition to be validated.
+ * @returns {object|null} - Returns a BadRequest response if validation fails, otherwise null.
+ */
+function UsageConditionValidator(res, usageCondition) {
+    if(usageCondition.trim() !== "Used" && usageCondition.trim() !== "New") {
+        return responseBuilder.BadRequest(res, "Invalid usage condition.")
+    }
+
+    /** Indicate pass the validation */
+    return null;
+}
+
 /** Exports the module/functions */
 module.exports = {
-    TypeAddition,
-    TypeAdditionValidation
+    AddTool,
+    AddToolValidation
 }
