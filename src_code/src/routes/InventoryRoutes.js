@@ -125,8 +125,10 @@ router.post('/types', async(request, response) => {
  * @return 200: 
  * Response object will be an array, and each item will have this: 
  * {
- *      typeId: int,
- *      typeName: string
+ *      "typeId": int,
+ *      "typeName": string,
+ *      "modelCount": int,
+ *      "reserved": 0
  * }
  */
 router.get('/types', async(request, response) => {

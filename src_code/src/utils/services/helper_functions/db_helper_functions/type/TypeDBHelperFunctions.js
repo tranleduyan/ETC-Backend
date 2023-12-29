@@ -77,18 +77,34 @@ async function AddTypeToDatabase(db, equipment_type_name) {
 async function GetTypeInfoByTypeId(db, typeId) {
     try {
         /** Retrieve type */
-        const type = await db('equipment_type').select(
+        const typePromise = await db('equipment_type').select(
             "PK_TYPE_ID AS typeId",
             "TYPE_NAME AS typeName"
         ).where("PK_TYPE_ID","=", typeId).first();
+
+        const modelsPromise = db("equipment_model").select(
+            "PK_MODEL_ID AS modelId",
+            "MODEL_NAME AS modelName",
+            "MODEL_PHOTO_URL AS modelPhoto"
+        ).where("FK_TYPE_ID", "=", parseInt(typeId, 10));
+
+        const [type, models] = await Promise.all([typePromise, modelsPromise]);
 
         /** If type not found, return null */
         if(!type) {
             return null;
         }
 
-        /** If there is type, return the type information */
-        return type;
+        /** Build a response object of type information */
+        const responseObject = {
+            typeId: type.typeId,
+            typeName: type.typeName,
+            models: models,
+            reserved: 0,
+        }
+
+        /** Return the response object */
+        return responseObject;
     } catch (error) {
         /** Log the error for debugging */
         console.log("ERROR: There is an error while retrieving type by id: ", error);

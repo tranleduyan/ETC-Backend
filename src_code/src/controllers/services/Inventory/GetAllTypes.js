@@ -1,6 +1,7 @@
 /** Initialize neccessary modules */
 const responseBuilder = require("../../../utils/interfaces/IResponseBuilder");
 const db = require("../../../configurations/database/DatabaseConfigurations");
+const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
 
 /**
  * Retrieves information about all equipment types from the database.
@@ -32,8 +33,20 @@ async function GetAllTypes(res) {
             })
         }
 
+        const typeInfoPromises = types.map(async (type) => {
+            const typeInfo = await dbHelper.GetTypeInfoByTypeId(db, type.typeId);
+            return {
+              typeId: type.typeId,
+              typeName: type.typeName,
+              modelCount: typeInfo.models?.length,
+              reserved: typeInfo.reserved
+            };
+          });
+          
+        const responseObject = await Promise.all(typeInfoPromises);
+
         /** If there is type and get successfully, return 200 */
-        return responseBuilder.GetSuccessful(res, types, "All types");
+        return responseBuilder.GetSuccessful(res, responseObject, "All types");
     } catch(error) {
         /** Log and return 503 */
         console.log("ERROR: There is an error while retrieving all types: ", error);
