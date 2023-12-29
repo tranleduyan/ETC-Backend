@@ -18,8 +18,8 @@ const streamifier = require("streamifier");
  * req.file (Maximum 1 file ends with .jpg, .png, .heic, .hevc, .heif)
  * req.body: 
  * {
- *      "model_name": string,
- *      "type_id": int
+ *      "modelName": string,
+ *      "typeId": int
  * }
  * 
  * Response is the message with status code 200 if successfully
@@ -91,12 +91,12 @@ async function ModelAddition(res, req) {
             imageUrl: imageUrl,
         }    
         /** After upload image file successfully, procceed to communicate with database */
-        const { model_name, type_id } = req.body;
+        const { modelName, typeId } = req.body;
 
         /** Prepare model's information/data for insert into model table */
         const modelData = {
-            FK_TYPE_ID: parseInt(type_id, 10),
-            MODEL_NAME: model_name,
+            FK_TYPE_ID: parseInt(typeId, 10),
+            MODEL_NAME: modelName,
             MODEL_PHOTO_URL: imageInfo.imageUrl,
             MODEL_PHOTO_ID: imageInfo.imageId,
         };
@@ -148,7 +148,7 @@ function ValidateImage(image) {
  * @param {string} typeId - The type ID obtained from the request body.
  * @returns {string|null} - If the validation fails, returns an error message; otherwise, returns null.
  */
-async function ValidateType(typeId) {
+async function ValidateType(typeId, modelName) {
     try {
         /** Ensure that type_id is a valid number */
         if(isNaN(parseInt(typeId, 10))) {
@@ -161,12 +161,63 @@ async function ValidateType(typeId) {
             return "Type not found."
         }
 
+        if(typeof modelName !== "string") {
+            return "Invalid model name type."
+        }
+
+        const existModelName = await db("equipment_model").select("MODEL_NAME AS modelName").where("MODEL_NAME", "LIKE", modelName.trim()).first();
+        if(existModelName) {
+            return "This model is already exists."
+        }
+
         /** Return null to indicate typeId is valid */
         return null;
     } catch(error) {
         /** Log error and return 503 */
         return "There is an error with the given type.";
     }
+}
+
+/**
+ * Validates a user based on the provided school ID, checking for validity and admin privileges.
+ *
+ * @param {string} schoolId - The school ID associated with the user.
+ * @returns {string|null} - A validation message or null if the user is valid.
+ *    - Returns a string if there's an invalid request, error in retrieving user information,
+ *      user not found, or insufficient permissions.
+ *    - Returns null to indicate that the user is valid.
+ */
+async function ValidateUser(schoolId) {
+    /** Ensure that schoolId should always be string */
+    if(typeof schoolId !== "string") {
+        return "Invalid type of school id.";
+    }
+        
+    /** Ensure school id is valid numeric */
+    if(isNaN(parseInt(schoolId, 10))) {
+        return "Invalid school id.";
+    }
+
+    /** Retrieve user information */
+    const user = await dbHelper.GetUserInfoBySchoolId(db, schoolId);
+
+    /** If there is error while retrieve user information, return error */
+    if(typeof user === "string") {
+        return user;
+    }
+
+    /** If user is not exist, return not found message */
+    if(!user) {
+        return "User not found.";
+    }
+
+    /** Ensure user is an admin */
+    if(user.userRole !== "Admin"){
+        return "You don't have permission to perform this action.";
+    }
+
+    /** Return null to indicate user is valid */
+    return null;
 }
 
 /** 
@@ -179,18 +230,24 @@ async function ValidateType(typeId) {
 async function ModelAdditionValidation(res, req) {
     try{
         /** Destructure variables from the request body */
-        const { model_name, type_id } = req.body;
+        const { modelName, typeId, schoolId } = req.body;
 
         /** Retrieve uploaded files from the form data */
         const image = req.file; 
 
         /** Ensure all required fields are provided with information */
-        if(!model_name || !type_id) {
+        if(!modelName || !typeId || !schoolId) {
             return responseBuilder.MissingContent(res);
+        }
+
+        /** Ensure that school id is valid, and only admin can perform this action */
+        const userError = await Promise.resolve(ValidateUser(schoolId));
+        if(userError) {
+            return responseBuilder.BadRequest(res, userError);
         }
         
         /** Ensure that there is no item's type error  */
-        const typeError = await Promise.resolve(ValidateType(type_id));
+        const typeError = await Promise.resolve(ValidateType(typeId, modelName));
         if(typeError) {
             return responseBuilder.BadRequest(res, typeError);
         }

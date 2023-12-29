@@ -97,6 +97,7 @@ async function GetTypeInfoByTypeId(db, typeId) {
     }
 }
 
+/** Exports the functions */
 module.exports = {
     GetTypeInfoByTypeId,
     GetTypeInfoByName,
