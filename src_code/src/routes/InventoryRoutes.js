@@ -288,6 +288,5 @@ router.delete('/models', async(request, response) => {
     }
 })
 
-
-
+/** Exports the router */
 module.exports = router;
