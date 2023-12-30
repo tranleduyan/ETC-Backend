@@ -96,7 +96,7 @@ async function ModelAddition(res, req) {
         /** Prepare model's information/data for insert into model table */
         const modelData = {
             FK_TYPE_ID: parseInt(typeId, 10),
-            MODEL_NAME: modelName,
+            MODEL_NAME: modelName.trim(),
             MODEL_PHOTO_URL: imageInfo.imageUrl,
             MODEL_PHOTO_ID: imageInfo.imageId,
         };
@@ -165,7 +165,7 @@ async function ValidateType(typeId, modelName) {
             return "Invalid model name type."
         }
 
-        const existModelName = await db("equipment_model").select("MODEL_NAME AS modelName").where("MODEL_NAME", "LIKE", modelName.trim()).first();
+        const existModelName = await db("equipment_model").select("MODEL_NAME AS modelName").where("MODEL_NAME", "LIKE", modelName.trim()).where("FK_TYPE_ID","=", typeId).first();
         if(existModelName) {
             return "This model is already exists."
         }
