@@ -2,6 +2,13 @@ const responseBuilder = require("../../../utils/interfaces/IResponseBuilder");
 const db = require("../../../configurations/database/DatabaseConfigurations");
 const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
 
+// TODO: delete (adding data for testing purposes only)
+async function AddTypeModelTemp() {
+    const [typeId] = await db('equipment_type').insert({ TYPE_NAME: "mii_game" });
+    const [modelId] = await db('equipment_model').insert({ FK_TYPE_ID : typeId, MODEL_NAME: "nintendo_building", MODEL_PHOTO_URL: "nintendo.com/miitopia" });
+    console.log(typeId + " " + modelId);
+}
+
 /**
  * 
  *
@@ -26,6 +33,8 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  */
 async function AddTool(res, req) {
     try {
+        // AddTypeModelTemp();
+
         /** Validate add tool body to see if information they request to our endpoint is valid */
         const errors = await Promise.resolve(AddToolValidation(res, req));
         if(errors) {
@@ -34,12 +43,27 @@ async function AddTool(res, req) {
 
         /** If validation pass, we need to destructure variables (see above) from the request body for use. */
         // TODO: get RFID/locaation info from request?
-        const { typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+        const { serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+
+        /** optional param purchase cost (null by default) */
+        let costData = null;
+        /** optional param purchase date (null by default) */
+        let dateData = null;
+
+        /** check if purchase cost is provided (optional param) */
+        if(purchaseCost) {
+            costData = purchaseCost;
+        }
+
+        /** check if purchase date is provided (optional param) */
+        if(purchaseDate) {
+            dateData = purchaseDate;
+        }
 
         /** Prepare data for table insert */
         // TODO: add RFID/location info to insert data
 		const insertData = {
-			PK_EQUIPMENT_SERIAL_ID: req.serialId,
+			PK_EQUIPMENT_SERIAL_ID: serialId.trim(),
 			FK_TYPE_ID: typeId,
 			FK_MODEL_ID: modelId,
             FK_CURRENT_ROOM_READER_ID: null,
@@ -47,8 +71,8 @@ async function AddTool(res, req) {
 			MAINTENANCE_STATUS: maintenanceStatus.trim(),
 			RESERVATION_STATUS: reservationStatus.trim(),
 			USAGE_CONDITION: usageCondition.trim(),
-			PURCHASE_COST: purchaseCost,
-			PURCHASE_DATE: purchaseDate
+			PURCHASE_COST: costData,
+			PURCHASE_DATE: dateData
 		}
 
 		/** Insert data into the table */
@@ -75,10 +99,10 @@ async function AddTool(res, req) {
 async function AddToolValidation(res, req) {
     try{
         /** Destructure variables from the request body */
-        const { serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+        const { serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition } = req;
         
-        /** We check for all variables even though they are optional because we expect to have them in request body */
-        if(!serialId || !typeId || !modelId || !maintenanceStatus || !reservationStatus || !usageCondition || !purchaseCost || !purchaseDate) {
+        /** We check for all required variables */
+        if(!serialId || typeof(typeId) == "undefined" || typeof(modelId) == "undefined" || !maintenanceStatus || !reservationStatus || !usageCondition) {
             return responseBuilder.MissingContent(res);
         }
         
@@ -86,6 +110,18 @@ async function AddToolValidation(res, req) {
         const serialIdError = await Promise.resolve(SerialIdValidator(res, serialId));
         if(serialIdError) {
             return serialIdError;
+        }
+
+        /** Validate type ID */
+        const typeIdError = await Promise.resolve(TypeIdValidator(res, typeId));
+        if(typeIdError) {
+            return typeIdError;
+        }
+
+        /** Validate model ID */
+        const modelIdError = await Promise.resolve(ModelIdValidator(res, modelId));
+        if(modelIdError) {
+            return modelIdError;
         }
 
         /** Validate tool maintenance status */
@@ -135,7 +171,7 @@ async function SerialIdValidator(res, serialId) {
     /** Retrieve tool with the serial ID to check for the uniqueness */
     const toolWithSerialId = await dbHelper.GetToolBySerialId(db, serialIdTemp);
 
-    /** Check if the toolWithSerialId is not null and if it type is string, return bad request */
+    /** Check if the toolWithSerialId is not null and if its type is string, return bad request */
     if(toolWithSerialId && typeof toolWithSerialId === "string") {
         return responseBuilder.BadRequest(res, toolWithSerialId);
     }
@@ -146,6 +182,58 @@ async function SerialIdValidator(res, serialId) {
     }
 
     /** Indicate pass the validation */
+    return null;
+}
+
+/**
+ * Validates the type ID.
+ *
+ * @param {object} res - The response object for the HTTP request.
+ * @param {string} typeId - The type ID to be validated.
+ * @returns {object|null} - Returns a BadRequest response if validation fails, otherwise null.
+ */
+async function TypeIdValidator(res, typeId) {
+    /** Retrieve type with the type ID to check if it exists */
+    const typeInDatabase = await dbHelper.GetTypeById(db, typeId);
+
+    /** Check if the typeInDatabase is not null and if its type is string, return bad request */
+    if(typeInDatabase && typeof typeInDatabase === "string") {
+        return responseBuilder.BadRequest(res, typeInDatabase);
+    }
+
+    /** If there isn't a type with the type ID, return bad request */
+    if(!typeInDatabase) { 
+        return responseBuilder.BadRequest(res,`Type with ID ${typeId} does not exist`);
+    }
+
+    /** Indicate pass the validation */
+    // TODO: return type name?
+    return null;
+}
+
+/**
+ * Validates the model ID.
+ *
+ * @param {object} res - The response object for the HTTP request.
+ * @param {string} modelId - The model ID to be validated.
+ * @returns {object|null} - Returns a BadRequest response if validation fails, otherwise null.
+ */
+async function ModelIdValidator(res, modelId) {
+    /** Retrieve model with the model ID to check if it exists */
+    const modelInDatabase = await dbHelper.GetModelById(db, modelId);
+
+    /** Check if the modelInDatabase is not null and if its type is string, return bad request */
+    if(modelInDatabase && typeof modelInDatabase === "string") {
+        return responseBuilder.BadRequest(res, modelInDatabase);
+    }
+
+    /** If there isn't a model with the model ID, return bad request */
+    if(!modelInDatabase) { 
+        return responseBuilder.BadRequest(res,`Model with ID ${modelId} does not exist`);
+    }
+
+    /** Indicate pass the validation */
+    // TODO: return model name?
     return null;
 }
 
