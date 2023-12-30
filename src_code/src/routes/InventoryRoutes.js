@@ -290,5 +290,40 @@ router.delete('/models', async(request, response) => {
     }
 })
 
+/**
+ * PUT/UPDATE TYPE NAME
+ * URL => /api/inventory/types/{typeId}
+ * requestBody: 
+ * {
+ *      "equipmentTypeName": string,
+ *      "schoolId": string
+ * }
+ * 
+ * @return 404 if failed validation, and if type name is exists
+ * @return 503 if server error
+ * @return 200 OK 
+ * {
+ *      "message":"Type updated successfully."
+ * }
+ */
+router.put('/types/:typeId', async(request, response) => {
+    try {
+        /** If there is no request body, then we return the request body is empty */
+        if(!request.body || Object.keys(request.body).length === 0) {
+            /** Return request body is empty */
+            return responseBuilder.MissingContent(response, "RB");
+        }
+        /** Retrieve type id of the requested update type */
+        const typeId = request.params.typeId;
+        /** Perform update type */
+        return await Promise.resolve(inventoryServices.TypeUpdate(response, request, typeId));
+    } catch(error) {
+        /** Logging unexpected error. help for debug */
+        console.log("ERROR: There is an error while updating type:", error);
+        /** Response error message to the client */
+        return responseBuilder.ServerError(response, "There is an error while updating type.");
+    }
+});
+
 /** Exports the router */
 module.exports = router;

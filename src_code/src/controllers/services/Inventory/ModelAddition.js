@@ -199,7 +199,7 @@ async function ValidateUser(schoolId) {
     }
 
     /** Retrieve user information */
-    const user = await dbHelper.GetUserInfoBySchoolId(db, schoolId);
+    const user = await Promise.resolve(dbHelper.GetUserInfoBySchoolId(db, schoolId));
 
     /** If there is error while retrieve user information, return error */
     if(typeof user === "string") {

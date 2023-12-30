@@ -50,7 +50,7 @@ async function TypesRemoval(res, req) {
             const deleteTypePromise = trx("equipment_type").whereIn("PK_TYPE_ID", typeIds).del();
 
             /** Perform deleting image promise and type promise concurrently */
-            const [deleteImageError, deleteTypePromiseResult] = await Promise.all([deleteImagePromise, deleteTypePromise]);
+            const [deleteImageError] = await Promise.all([deleteImagePromise, deleteTypePromise]);
 
             /** If there is error while deleting image, roll back and restore images */
             if(deleteImageError) {
@@ -59,7 +59,7 @@ async function TypesRemoval(res, req) {
 
                 /** Create restore promise */
                 const restoreImagePromises = modelPhotoIds.map(async (modelPhotoId) => {
-                    await helpers.RestoreDeletedDriveImage(drive, modelPhotoId);
+                    await Promise.resolve(helpers.RestoreDeletedDriveImage(drive, modelPhotoId));
                 });
 
                 /** Perform promises concurrently */
@@ -87,7 +87,7 @@ async function TypesRemoval(res, req) {
             
             /** Create restore image promises */
             const restoreImagePromises = modelPhotoIds.map(async (modelPhotoId) => {
-                await helpers.RestoreDeletedDriveImage(drive, modelPhotoId);
+                await Promise.resolve(helpers.RestoreDeletedDriveImage(drive, modelPhotoId));
             });
     
             /** Concurrently perform all the promises */
@@ -124,7 +124,7 @@ async function ValidateUser(schoolId) {
     }
 
     /** Retrieve user information */
-    const user = await dbHelper.GetUserInfoBySchoolId(db, schoolId);
+    const user = await Promise.resolve(dbHelper.GetUserInfoBySchoolId(db, schoolId));
 
     /** If there is error while retrieve user information, return error */
     if(typeof user === "string") {
