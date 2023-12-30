@@ -316,7 +316,7 @@ router.put('/types/:typeId', async(request, response) => {
         /** Retrieve type id of the requested update type */
         const typeId = request.params.typeId;
         /** Perform update type */
-        return await Promise.resolve(inventoryServices.TypeUpdate(response, request, typeId));
+        return await Promise.resolve(inventoryServices.TypeUpdate(response, request.body, typeId));
     } catch(error) {
         /** Logging unexpected error. help for debug */
         console.log("ERROR: There is an error while updating type:", error);
