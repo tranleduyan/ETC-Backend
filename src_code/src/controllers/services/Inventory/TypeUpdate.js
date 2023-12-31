@@ -94,6 +94,11 @@ async function TypeUpdateValidation(res, req, typeId) {
             return responseBuilder.MissingContent(res);
         }
 
+        /** Ensure that equipment type name is always a string type */
+        if(typeof equipmentTypeName !== "string"){
+            return responseBuilder.BadRequest(res, "Invalid type of type's name.");
+        }
+
         /** Ensure typeId is a valid numeric type */
         if(isNaN(parseInt(typeId, 10))) {
             return responseBuilder.BadRequest(res, "Invalid type id.");

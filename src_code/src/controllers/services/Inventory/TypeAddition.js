@@ -108,6 +108,11 @@ async function TypeAdditionValidation(res, req) {
             return responseBuilder.MissingContent(res);
         }
 
+        /** Ensure that equipment type name is always a string type */
+        if(typeof equipmentTypeName !== "string") {
+            return responseBuilder.BadRequest(res, "Invalid type of type's name.");
+        }
+
         /** Ensure user is valid */
         const userError = await Promise.resolve(ValidateUser(schoolId));
         if(userError) {

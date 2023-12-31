@@ -151,7 +151,7 @@ function ValidateImage(image) {
 async function ValidateType(typeId, modelName) {
     try {
         /** Ensure that type_id is a valid number */
-        if(isNaN(parseInt(typeId, 10))) {
+        if(typeof typeId === "string" && isNaN(parseInt(typeId, 10))) {
             return "Invalid type selected."
         }
 
