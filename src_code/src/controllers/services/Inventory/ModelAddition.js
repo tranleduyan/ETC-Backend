@@ -123,7 +123,7 @@ async function ModelAddition(res, req) {
  */
 function ValidateImage(image) {
     /** Defined allowed image file extensions */
-    const allowedImageExtensions = ["jpg", "jpeg", "png", "heic", "heif", "hevc"];
+    const allowedImageExtensions = ["jpg", "jpeg", "png", "heic", "heif", "hevc", "webp"];
 
     /** Ensure that there is at least 1 image is uploaded */
     if(!image || image.length === 0) {
