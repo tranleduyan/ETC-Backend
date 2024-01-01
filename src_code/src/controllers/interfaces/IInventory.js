@@ -9,6 +9,7 @@ const GetTypeInformationService = require("../services/Inventory/GetTypeInformat
 const GetModelInformationService = require("../services/Inventory/GetModelInformation");
 const TypesRemovalServices = require("../services/Inventory/TypesRemoval");
 const TypeUpdateServices = require("../services/Inventory/TypeUpdate");
+const ModelUpdateServices = require("../services/Inventory/ModelUpdate");
 
 /** Exports the module */
 module.exports = {
@@ -21,5 +22,6 @@ module.exports = {
     GetTypeInformation: GetTypeInformationService.GetTypeInformation,
     GetModelInformation: GetModelInformationService.GetModelInformation,
     TypesRemoval: TypesRemovalServices.TypesRemoval,
-    TypeUpdate: TypeUpdateServices.TypeUpdate
+    TypeUpdate: TypeUpdateServices.TypeUpdate, 
+    ModelUpdate: ModelUpdateServices.ModelUpdate,
 }

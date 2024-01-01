@@ -11,11 +11,6 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  * @param {object} req - The request object from the HTTP request.
  * @returns {object} - This response object indicates the result of the type addition attempt.
  * 
- * Expected Request Body: 
- * {
- *      "Type": "Name"
- * }
- * 
  * Response is the message with status code 200 if successfully
  * Else return a server error of status code 503 (see ResponsiveBuilder.js) - the error are trying to input invalid format to database or any thing else that cannot be seen forward
  */

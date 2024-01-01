@@ -8,6 +8,8 @@ const streamifier = require("streamifier");
 
 async function ModelUpdate(res, req, modelId) {
     const trx = await db.transaction();
+    let updatePhotoInfo = null;
+    let originalPhotoInfo = null;
     try{
         const errors = await Promise.resolve(ModelUpdateValidation(res, req, modelId));
         if(errors) {
@@ -19,13 +21,121 @@ async function ModelUpdate(res, req, modelId) {
 
         /** Destructure variables from request body */
         const { typeId, modelName } = req.body;
-        
+
         /** Retrieve image from request file */
         const image = req.file;
 
-        /** Start retrieving  */
-    } catch(error) {
+        /** Start retrieving  */ 
+        if(image) {
+            /** Create a read stream for image data */
+            const fileStream = streamifier.createReadStream(image.buffer);
 
+            /** Upload image to storage */
+            let driveResponse;
+
+            /** Try uploading the image */
+            try {
+                driveResponse = await drive.files.create({
+                    requestBody: {
+                        /** Name of the file when we upload to storage (currently taking whatever the user's image name) */
+                        name: image.originalname,
+                        /** Set the MIME type of the image */
+                        mimeType: image.mimeType,
+                        /** Set the parent folder ID on Google Drive (Folder ETC) */
+                        parents: ["1cyehGWgUFZ-6DTSBFCUe7yjOrKEE-Btd"],
+                    },
+                    media: {
+                        /** Set the MIME type again for the media body */
+                        mimeType: image.mimeType,
+                        /** Attach the image data as the media body */
+                        body: fileStream,
+                    }
+                });
+            } catch(uploadImageError) {
+                /** Log and return 503 */
+                console.log("ERROR: There is an error occur while uploading image: ", uploadImageError);
+                return responseBuilder.ServerError(res, "There is an error occur while processing your image.");
+            }
+
+            /** Retrieve the file ID from the storage's response */
+            const imageId = driveResponse.data.id;
+
+            /** Generate a public URL for the uploaded image */
+            const imageUrl = await helpers.GenerateDriveImagePublicUrl(drive, imageId);
+
+            /** If failed to generate drive image, roll back */
+            if(!imageUrl) {
+                /** If failed to upload, clear the image if it is uploaded successfully */
+                await helpers.DeleteDriveImage(drive, imageId);
+                /** Return 503 */
+                return responseBuilder.ServerError(res, "There is an error occur while retrieving image information.");
+            }
+
+            /** Store information about uploaded image */
+            updatePhotoInfo = {
+                imageId: imageId,
+                imageUrl: imageUrl,
+            }
+            
+            /** Retrieve model's photo id in order to remove it */
+            const model = await trx("equipment_model").select("MODEL_PHOTO_ID AS modelPhotoId", "MODEL_PHOTO_URL AS modelPhotoUrl").where("PK_MODEL_ID", "=", numericModelId).first();
+            
+            /** Save original photo info for roll back transaction */
+            originalPhotoInfo = {
+                imageId: model.modelPhotoId,
+                imageUrl: model.modelPhotoUrl,
+            };
+
+            /** Create delete image promise */
+            const deleteCurrentImageError = await Promise.resolve(helpers.DeleteDriveImage(drive, model.modelPhotoId));
+            if(deleteCurrentImageError) {
+                /** Delete the new update photo */
+                await helpers.DeleteDriveImage(drive, updatePhotoInfo.imageId);
+                return responseBuilder.ServerError(res, deleteCurrentImageError);
+            }
+        }
+        
+        /** Update model's information/data based on if user is update image or not */
+        const modelData = image ? {
+            FK_TYPE_ID: parseInt(typeId, 10), 
+            MODEL_NAME: modelName.trim(),
+            MODEL_PHOTO_URL: updatePhotoInfo.imageUrl,
+            MODEL_PHOTO_ID: updatePhotoInfo.imageId,
+        } : {
+            FK_TYPE_ID: parseInt(typeId, 10),
+            MODEL_NAME: modelName.trim()
+        }
+
+        /** Update table "equipment_model with the model data" */
+        await trx("equipment_model").where("PK_MODEL_ID", "=", numericModelId).update(modelData);
+
+        /** Commit the transaction */
+        await trx.commit();
+
+        /** Return successful response */
+        return responseBuilder.UpdateSuccessful(res, null, "A model");
+    } catch(error) {
+        if(req.file){
+            let deleteNewUploadPhotoPromise = null;
+            let restoreOriginalPhotoPromise = null;
+            /** Create roll back promise */
+            const rollbackPromise = trx.rollback();
+            /** Create delete new uploaded image promise */
+            if(updatePhotoInfo) {
+                deleteNewUploadPhotoPromise = helpers.DeleteDriveImage(drive, updatePhotoInfo.imageId);
+            }
+            /** Create restore deleted current image promise */
+            if(originalPhotoInfo) {
+                restoreOriginalPhotoPromise = helpers.RestoreDeletedDriveImage(drive, originalPhotoInfo.imageId);
+            }
+            /** Perform concurrently */
+            await Promise.all([rollbackPromise, deleteNewUploadPhotoPromise, restoreOriginalPhotoPromise]);
+        } else {
+            await trx.rollback();
+        }
+        /** Log errors and return 503 */
+        console.log("ERROR: There is an error while update model information:", error);
+        return responseBuilder.ServerError(res, "There is an error while updating model's information.");
     }
 }
 /**
@@ -36,7 +146,7 @@ async function ModelUpdate(res, req, modelId) {
  */
 function ValidateImage(image) {
     /** Defined allowed image file extensions */
-    const allowedImageExtensions = ["jpg", "jpeg", "png", "heic", "heif", "hevc"];
+    const allowedImageExtensions = ["jpg", "jpeg", "png", "heic", "heif", "hevc", "webp"];
 
     /** Ensure that there is at least 1 image is uploaded */
     if(!image || image.length === 0) {
@@ -69,7 +179,7 @@ async function ValidateType(typeId, modelName, modelId) {
         }
 
         /** Retrieve type to see if type_id is an id of an exist type */
-        const type = await Promise.resolve(dbHelper.GetTypeInfoByTypeId(db, typeId));
+        const type = await Promise.resolve(dbHelper.GetTypeInfoByTypeId(db, parseInt(typeId,10)));
         if(!type) {
             return "Type not found."
         }
@@ -86,7 +196,7 @@ async function ValidateType(typeId, modelName, modelId) {
         }
 
         /** Ensure requestModel's name is not exist in the type yet. */
-        const existModelName = await db("equipment_model").select("PK_MODEL_ID AS modelId").where("MODEL_NAME", "LIKE", modelName.trim()).where("FK_TYPE_ID","=", typeId).first();
+        const existModelName = await db("equipment_model").select("PK_MODEL_ID AS modelId").where("MODEL_NAME", "LIKE", modelName.trim()).where("FK_TYPE_ID","=", parseInt(typeId,10)).first();
         if(existModelName) {
             if(existModelName.modelId !== modelId){
                 return "This model already exists in this type."
@@ -146,7 +256,7 @@ async function ValidateUser(schoolId) {
 async function ModelUpdateValidation(res, req, modelId) {
     try {
         /** Destructure variables from the request body */
-        const { modelName, modelPhotoId, typeId, schoolId } = req.body;
+        const { modelName, typeId, schoolId } = req.body;
 
         /** Ensure all required fields is filled */
         if(!modelName || !typeId || !schoolId) {
@@ -155,11 +265,8 @@ async function ModelUpdateValidation(res, req, modelId) {
 
         /** Ensure the model id must be a number */
         if(isNaN(parseInt(modelId.trim()))) {
-            return responseBuilder.BadRequest(res, "Invalid request.");
+            return responseBuilder.BadRequest(res, "Invalid type of information..");
         }
-
-        /** Retrieve uploaded files from the form data */
-        const image = req.file; 
 
         /** Ensure that school id is valid, and only admin can perform this action */
         const userError = await Promise.resolve(ValidateUser(schoolId));
@@ -173,12 +280,27 @@ async function ModelUpdateValidation(res, req, modelId) {
             return responseBuilder.BadRequest(res, typeError);
         }
 
-        /** Ensure that the uploaded file is an image type */
-        const imageError = ValidateImage(image);
-        if(imageError) {
-            return responseBuilder.BadRequest(res, imageError);
-        }
-    } catch(error) {
+        /** Retrieve uploaded files from the form data */
+        const image = req.file; 
 
+        /** If image is update, then validate image */
+        if(image) {
+            /** Ensure that the uploaded file is an image type */
+            const imageError = ValidateImage(image);
+            if(imageError) {
+                return responseBuilder.BadRequest(res, imageError);
+            }
+        }
+
+        /** Return null to indicate information is valid */
+        return null;
+    } catch(error) {
+        /** Log error and return 503 */
+        console.log("ERROR: There is an error while validating model's information:", error);
+        return responseBuilder.ServerError(res, "There is an error while validating model's information.");
     }
+}
+
+module.exports = {
+    ModelUpdate
 }

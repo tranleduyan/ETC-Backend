@@ -167,7 +167,7 @@ async function ValidateType(typeId, modelName) {
 
         const existModelName = await db("equipment_model").select("MODEL_NAME AS modelName").where("MODEL_NAME", "LIKE", modelName.trim()).where("FK_TYPE_ID","=", typeId).first();
         if(existModelName) {
-            return "This model is already exists."
+            return "This model already exists in this type."
         }
 
         /** Return null to indicate typeId is valid */

@@ -38,7 +38,7 @@ router.post('/remove', async(request, response) => {
  * 
  * req.file:
  * {
- *      fieldName: 'recipePhotos',
+ *      fieldName: 'image',
  *      originalName: 'example.jpg',
  *      encoding: '7bit',
  *      mimetype: 'image/jpeg,
@@ -324,6 +324,50 @@ router.put('/types/:typeId', async(request, response) => {
         return responseBuilder.ServerError(response, "There is an error while updating type.");
     }
 });
+
+/**
+ * PUT/MODEL UPDATE
+ * URL => /api/inventory/models/{modelId}
+ * requestBody:
+ * {
+ *      "schoolId": string,
+ *      "modelName":string,
+ *      "typeId": int     
+ * }
+ * 
+ * QueryParams: modelId
+ * 
+ * req.file:
+ * {
+ *      fieldName: 'image',
+ *      originalName: 'example.jpg',
+ *      encoding: '7bit',
+ *      mimetype: 'image/jpeg,
+ *      size: 12345,
+ *      buffer: buffer (bit)
+ *  }   
+ * 
+ * @return 400 (If failed validation)
+ *         503 (If server error) 
+ *         200 (Success OK)
+ */
+router.put("/models/:modelId", upload.single('image'), async(request, response) => {
+    try{
+        /** If there is no request body, then we return the request body is empty */
+        if(!request.body || Object.keys(request.body).length === 0) {
+            /** Return request body is empty */
+            return responseBuilder.MissingContent(response, "RB");
+        }
+        /** Retrieve model id of the requested update model */
+        const modelId = request.params.modelId;
+        /** Perform update model */
+        return await Promise.resolve(inventoryServices.ModelUpdate(response, request, modelId));
+    } catch(error) {
+        /** Log error and return 503 */
+        console.log("ERROR: There is an error while updating model's information:", error);
+        return responseBuilder.ServerError(res, "There is an error while updating the model.");
+    }
+})
 
 /** Exports the router */
 module.exports = router;
