@@ -18,7 +18,7 @@ function BuildResponse(res, statusCode, body) {
    */
   function NotFound(res, entityName = "") {
     /** Construct a customized message for entity not found. */
-    var responseMessage = "";
+    let responseMessage = "";
   
     /** If there is entity name, we return message with the entity name */
     if (entityName.length !== 0) {
@@ -49,7 +49,7 @@ function BuildResponse(res, statusCode, body) {
    */
   function CreateSuccessful(res, responseObject = null, entityName = "") {
     /** Construct a customized message for created entity */
-    var responseMessage = "";
+    let responseMessage = "";
   
     /** If there is entity name, we return message with the entity name */
     if (entityName.length !== 0) {
@@ -88,7 +88,7 @@ function BuildResponse(res, statusCode, body) {
    */
   function GetSuccessful(res, responseObject = null, entityName = "") {
     // Construct a customized message for the retrieved entity
-    var responseMessage = "";
+    let responseMessage = "";
   
     /** If there is entity name, we return message with the entity name */
     if (entityName.length !== 0) {
@@ -126,7 +126,7 @@ function BuildResponse(res, statusCode, body) {
    */
   function UpdateSuccessful(res, responseObject = null, entityName = "") {
     /** Construct a customized message for updated entity */
-    var responseMessage = "";
+    let responseMessage = "";
   
     /** If there is entity name, we return message with the entity name */
     if (entityName.length !== 0) {
@@ -163,7 +163,7 @@ function BuildResponse(res, statusCode, body) {
    */
   function DeleteSuccessful(res, entityName = "") {
     /** Construct a customized message for deleted entity */
-    var responseMessage = "";
+    let responseMessage = "";
   
     /** If there is entity name, we return message with the entity name */
     if (entityName.length !== 0) {
