@@ -56,7 +56,7 @@ async function ModelAddition(res, req) {
                     /** Set the MIME type of the image */
                     mimeType: image.mimeType,
                     /** Set the parent folder ID on Google Drive (Folder ETC) */
-                    parents: ["1cyehGWgUFZ-6DTSBFCUe7yjOrKEE-Btd"],
+                    parents: ["1gWj1KW31VfEfdqWONQXXg_9qDX4ndUNx"],
                 },
                 media: {
                     /** Set the MIME type again for the media body */
