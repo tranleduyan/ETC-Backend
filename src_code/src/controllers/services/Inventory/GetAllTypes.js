@@ -39,6 +39,7 @@ async function GetAllTypes(res) {
               typeId: type.typeId,
               typeName: type.typeName,
               modelCount: typeInfo.models?.length,
+              equipmentCount: typeInfo.equipments?.length,
               reserved: typeInfo.reserved
             };
           });
