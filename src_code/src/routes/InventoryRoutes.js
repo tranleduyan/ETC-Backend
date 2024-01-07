@@ -369,5 +369,34 @@ router.put("/models/:modelId", upload.single('image'), async(request, response) 
     }
 })
 
+/** 
+ * GET/RETRIEVE ALL MODELS SORT BY TYPE NAME
+ * URL => /api/inventory/models
+ * Response Body: 
+ * {
+ *  "message": "Models successfully retrieved.",
+ *  "responseObject": 
+ *  [
+ *      {
+ *          "modelId": 59,
+ *          "modelName": "Oakton Aneroid",
+ *          "typeName": "Barometer",
+ *          "equipmentCount": 2
+ *      },
+ *  ]
+ * }
+ */
+router.get("/models", async(request, response) => {
+    try{ 
+        /** Perform delete models */
+        return await Promise.resolve(inventoryServices.GetAllModels(response));
+    } catch(error) {
+        /** Logging unexpected error. help for debug */
+        console.log("ERROR: There is an error while retrieving model's information:", error);
+        /** Response error message to the client */
+        return responseBuilder.ServerError(response, "There is an error while retrieving model's information.");
+    }
+})
+
 /** Exports the router */
 module.exports = router;
