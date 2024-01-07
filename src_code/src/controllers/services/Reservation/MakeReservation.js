@@ -204,7 +204,7 @@ async function EquipmentValidation(equipment, startDate, endDate) {
         const modelPromise = dbHelpers.GetModelInfoByModelId(db, equipment.modelId);
 
         /** Retrieve available count of the equipment */
-        const availableCountPromise = dbHelpers.GetAvailableEquipment(db, equipment.modelId, equipment.typeId, startDate, endDate);
+        const availableCountPromise = dbHelpers.GetEquipmentAvailableCount(db, equipment.modelId, equipment.typeId, startDate, endDate);
         
         /** Perform the promise concurrently */
         const [type, model, availableCount] = await Promise.all([typePromise, modelPromise, availableCountPromise])
