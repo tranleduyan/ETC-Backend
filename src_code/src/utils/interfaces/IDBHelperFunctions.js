@@ -11,4 +11,5 @@ module.exports = {
     AddTypeToDatabase: typeDBHelperFunctions.AddTypeToDatabase,
     GetTypeInfoByTypeId: typeDBHelperFunctions.GetTypeInfoByTypeId,
     GetModelInfoByModelId: modelDBHelperFunctions.GetModelInfoByModelId,
+    GetEquipmentAvailableCount: modelDBHelperFunctions.GetEquipmentAvailableCount
 }
