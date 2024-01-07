@@ -37,17 +37,20 @@ async function GetAvailableModels(res, startDate, endDate) {
     /** Create promise for concurrently fetch availableCount for each model */
     const availabilityPromises = allModels.map(async (model) => {
         const availableCount = await dbHelpers.GetEquipmentAvailableCount(db, model.modelId, model.typeId, startDate, endDate);
-        return {
-            modelId: model.modelId,
-            modelName: model.modelName,
-            modelPhoto: model.modelPhoto,
-            typeName: model.typeName,
-            availableCount: availableCount,
-        };
+        if (availableCount > 0) {
+            return {
+                modelId: model.modelId,
+                modelName: model.modelName,
+                modelPhoto: model.modelPhoto,
+                typeName: model.typeName,
+                availableCount: availableCount,
+            };
+        }
+        return null;
     });
 
     /** Wait for all promises to resolve */
-    const responseObject = await Promise.all(availabilityPromises);
+    const responseObject = (await Promise.all(availabilityPromises)).filter(result => result !== null);
 
     /** Return Get Successful message with response to the client */
     return responseBuilder.GetSuccessful(res, responseObject, "Available models");
