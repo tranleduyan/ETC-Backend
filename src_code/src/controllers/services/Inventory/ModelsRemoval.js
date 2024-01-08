@@ -11,6 +11,15 @@ const drive = require("../../../configurations/googleapis/GoogleAPIConfiguration
  * @param {Object} res - Express response object.
  * @param {Object} req - Express request object containing modelIds and schoolId.
  * @returns {Object} - Response object indicating success or error.
+ * 
+ * Expected Request Body:
+ * {
+ *   "schoolId": "810922119",
+ *   "modelIds": [
+ *       9
+ *   ]
+ * }
+ * 
  */
 async function ModelsRemoval(res, req) {
     /** Open the transaction */

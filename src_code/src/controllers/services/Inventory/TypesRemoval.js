@@ -13,6 +13,15 @@ const drive = require("../../../configurations/googleapis/GoogleAPIConfiguration
  * @returns {Object} - The response object representing the outcome of the operation.
  *                    Possible responses include 200 OK for successful deletion,
  *                    400 Bad Request for validation errors, and 503 Server Error for other errors.
+ * 
+ * Expected Request Body:
+ *  {
+ *      "schoolId": "810922119",
+ *      "typeIds": [
+ *          51, 52
+ *      ]
+ *  }
+ * 
  */
 async function TypesRemoval(res, req) {
     /** Open the transaction */

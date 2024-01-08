@@ -10,7 +10,20 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  * @param {string} modelId - The identifier for the model to retrieve information.
  * @returns {Object} - The response object representing the outcome of the operation.
  *                     Possible responses include 400 Bad Request, 404 Not Found,
- *                     and 200 OK with the retrieved model information.
+ *                     and 200 OK with the retrieved model information - modelId, modelName, modelPhotoId, modelPhoto, typeName.
+ * 
+ * Response Body:
+ * {
+ *   "message": "JINYISI information successfully retrieved.",
+ *   "responseObject": {
+ *       "modelId": 65,
+ *       "modelName": "JINYISI",
+ *       "modelPhotoId": "1KrNWnG9_uvajmegDs96bqPRAeVjqvKGP",
+ *       "modelPhoto": "https://drive.google.com/uc?id=1KrNWnG9_uvajmegDs96bqPRAeVjqvKGP",
+ *       "typeName": "Barometer"
+ *   }
+ * }
+ * 
  */
 async function GetModelInformation(res, modelId) {
     try { 
