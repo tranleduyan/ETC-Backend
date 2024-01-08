@@ -6,7 +6,7 @@ const db = require("../../../configurations/database/DatabaseConfigurations");
  * Retrieves information about all equipment models and their respective equipment counts.
  *
  * @param {Object} res - Express response object for sending HTTP responses.
- * @returns {Object} An HTTP response containing information about equipment models and their counts.
+ * @returns {Object} An HTTP response containing an array of information about equipment models and their counts.
  * If successful, returns a JSON response with status 200 and an array of model information.
  * If no models are found, returns a JSON response with status 400 and an error message.
  * If an error occurs during the process, returns a JSON response with status 503 and an error message.

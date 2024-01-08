@@ -20,14 +20,14 @@ async function GetAvailableModels(res, startDate, endDate) {
 
         /** Fetch all models from the database */
         const allModels = await db("equipment_model")
-        .select(
-            "equipment_type.TYPE_NAME as typeName",
-            "equipment_model.FK_TYPE_ID AS typeId",
-            "equipment_model.PK_MODEL_ID as modelId",
-            "equipment_model.MODEL_NAME as modelName",
-            "equipment_model.MODEL_PHOTO_URL as modelPhoto"
-        )
-        .join("equipment_type", "equipment_type.PK_TYPE_ID", "=", "equipment_model.FK_TYPE_ID");
+            .select(
+                "equipment_type.TYPE_NAME as typeName",
+                "equipment_model.FK_TYPE_ID AS typeId",
+                "equipment_model.PK_MODEL_ID as modelId",
+                "equipment_model.MODEL_NAME as modelName",
+                "equipment_model.MODEL_PHOTO_URL as modelPhoto"
+            )
+            .join("equipment_type", "equipment_type.PK_TYPE_ID", "=", "equipment_model.FK_TYPE_ID");
 
     /** Check if there are no models, return a BadRequest response */
     if (!allModels || allModels?.length === 0) {

@@ -1,6 +1,5 @@
 /** Initialize neccessary modules */
 const responseBuilder = require("../../../utils/interfaces/IResponseBuilder");
-const helpers = require("../../../utils/interfaces/IHelperFunctions");
 const dbHelpers = require("../../../utils/interfaces/IDBHelperFunctions");
 const db = require("../../../configurations/database/DatabaseConfigurations");
 
@@ -40,11 +39,11 @@ async function MakeReservation(res, req) {
         let reservationStatus = "Requested";
 
         /** Retrieve user information */
-        const user = await dbHelpers.GetUserInfoBySchoolId(db, schoolId);
+        const user = await Promise.resolve(dbHelpers.GetUserInfoBySchoolId(db, schoolId));
         if(user.userRole === "Faculty") {
             reservationStatus = "Approved";
         }
-        console.lo
+
         /** Prepare data to insert */
         const reservationData = {
             FK_SCHOOL_ID: schoolId.trim(),
@@ -241,7 +240,7 @@ async function EquipmentValidation(equipment, startDate, endDate) {
         return null;
     } catch(error) {
         /** Log and return error */
-        console.log(`ERROR: There is an error while validating equipment with the information \'${equipment}\' for creating reservation:`, error);
+        console.log(`ERROR: There is an error while validating equipment with the information '${equipment.name}' for creating reservation:`, error);
         return "There is an error occur while creating your reservation.";
     }
 }
