@@ -88,7 +88,20 @@ async function GetTypeInfoByTypeId(db, typeId) {
             "MODEL_PHOTO_URL AS modelPhoto"
         ).where("FK_TYPE_ID", "=", parseInt(typeId, 10));
 
-        const [type, models] = await Promise.all([typePromise, modelsPromise]);
+        const equipmentsPromise = db("equipment").select(
+            "PK_EQUIPMENT_SERIAL_ID AS serialNumber",
+            "MODEL_NAME AS modelName", 
+            "MAINTENANCE_STATUS AS maintenanceStatus",
+            "RESERVATION_STATUS AS reservationStatus",
+            "USAGE_CONDITION AS usageCondition",
+            "PURCHASE_COST AS purchaseCost",
+            "PURCHASE_DATE AS purchaseDate"
+        ).join("equipment_model","equipment.FK_MODEL_ID", "=", "equipment_model.PK_MODEL_ID")
+        .where("equipment.FK_TYPE_ID", "=", parseInt(typeId, 10));
+
+        const [type, models, equipments] = await Promise.all([typePromise, modelsPromise, equipmentsPromise]);
+        
+        
 
         /** If type not found, return null */
         if(!type) {
@@ -100,6 +113,7 @@ async function GetTypeInfoByTypeId(db, typeId) {
             typeId: type.typeId,
             typeName: type.typeName,
             models: models,
+            equipments: equipments,
             reserved: 0,
         }
 

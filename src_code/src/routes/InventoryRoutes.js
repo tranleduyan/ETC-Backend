@@ -369,5 +369,67 @@ router.put("/models/:modelId", upload.single('image'), async(request, response) 
     }
 })
 
+/** 
+ * GET/RETRIEVE ALL MODELS SORT BY TYPE NAME
+ * URL => /api/inventory/models
+ * Response Body: 
+ * {
+ *  "message": "Models successfully retrieved.",
+ *  "responseObject": 
+ *  [
+ *      {
+ *          "modelId": 59,
+ *          "modelName": "Oakton Aneroid",
+ *          "typeName": "Barometer",
+ *          "equipmentCount": 2
+ *      },
+ *  ]
+ * }
+ */
+router.get("/models", async(request, response) => {
+    try{ 
+        /** Perform delete models */
+        return await Promise.resolve(inventoryServices.GetAllModels(response));
+    } catch(error) {
+        /** Logging unexpected error. help for debug */
+        console.log("ERROR: There is an error while retrieving model's information:", error);
+        /** Response error message to the client */
+        return responseBuilder.ServerError(response, "There is an error while retrieving model's information.");
+    }
+})
+
+/**
+ * GET/RETRIEVE ALL AVAILABLE EQUIPMENTS/MODELS IN A PERIOD OF TIME
+ * URL => /api/inventory/available-models?startDate=value&endDate=value
+ * Response Body: 
+ * {
+ *  "message": "Available models successfully retrieved.",
+ *  "responseObject": 
+ *   [
+ *      {
+ *          "modelId": 59,
+ *          "modelName": "Oakton Aneroid",
+ *          "modelPhoto": "https://drive.google.com/uc?id=1NvjXSvJtM1RJQbVAQIqs9NhY4ptF0oUT",
+ *          "typeName": "Barometer",
+ *          "availableCount": 2
+ *      }
+ *   ]
+ * }
+ */
+router.get("/available-models", async(request, response) => {
+    try{ 
+        /** Retrieve values from query parameters */
+        const startDate = request.query.startDate;
+        const endDate = request.query.endDate;
+        /** Perform delete models */
+        return await Promise.resolve(inventoryServices.GetAvailableModels(response, startDate, endDate));
+    } catch(error) {
+        /** Logging unexpected error. help for debug */
+        console.log("ERROR: There is an error while retrieving model's information:", error);
+        /** Response error message to the client */
+        return responseBuilder.ServerError(response, "There is an error while retrieving model's information.");
+    }
+})
+
 /** Exports the router */
 module.exports = router;
