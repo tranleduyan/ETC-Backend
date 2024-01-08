@@ -44,7 +44,7 @@ async function GetAllModels(res, req) {
             return {
                 modelId: model.modelId,
                 modelName: model.modelName,
-                modelPhoto: model.photoURL,
+                modelPhoto: model.photoUrl,
                 typeName: model.typeName,
                 equipmentCount: equipmentCount
             };
