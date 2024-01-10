@@ -8,7 +8,7 @@ const db = require("../../../configurations/database/DatabaseConfigurations");
  * @param {Object} res - Express response object for sending HTTP responses.
  * @returns {Object} An HTTP response containing an array of information about equipment models and their counts.
  * If successful, returns a JSON response with status 200 and an array of model information.
- * If no models are found, returns a JSON response with status 400 and an error message.
+ * If no models are found, returns a JSON response with status 404 and an error message.
  * If an error occurs during the process, returns a JSON response with status 503 and an error message.
  */
 async function GetAllModels(res, req) {
@@ -26,7 +26,7 @@ async function GetAllModels(res, req) {
 
         /** Check if there are no models, return a BadRequest response */
         if (!allModels || allModels?.length === 0) {
-            return responseBuilder.BadRequest(res, "There is no model added yet.");
+            return responseBuilder.NotFound(res, "There is no model added yet.");
         }
 
         /** Concurrently fetch equipment count for each model */
