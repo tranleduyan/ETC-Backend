@@ -29,32 +29,33 @@ async function GetAvailableModels(res, startDate, endDate) {
             )
             .join("equipment_type", "equipment_type.PK_TYPE_ID", "=", "equipment_model.FK_TYPE_ID");
 
-    /** Check if there are no models, return a BadRequest response */
-    if (!allModels || allModels?.length === 0) {
-        return responseBuilder.BadRequest(res, "There is no model available in this period of time.");
-    }
-
-    /** Create promise for concurrently fetch availableCount for each model */
-    const availabilityPromises = allModels.map(async (model) => {
-        const availableCount = await dbHelpers.GetEquipmentAvailableCount(db, model.modelId, model.typeId, startDate, endDate);
-        if (availableCount > 0) {
-            return {
-                modelId: model.modelId,
-                modelName: model.modelName,
-                modelPhoto: model.modelPhoto,
-                typeName: model.typeName,
-                availableCount: availableCount,
-            };
+        /** Check if there are no models, return a BadRequest response */
+        if (!allModels || allModels?.length === 0) {
+            return responseBuilder.BadRequest(res, "There is no model available in this period of time.");
         }
-        return null;
-    });
 
-    /** Wait for all promises to resolve */
-    const responseObject = (await Promise.all(availabilityPromises)).filter(result => result !== null);
+        /** Create promise for concurrently fetch availableCount for each model */
+        const availabilityPromises = allModels.map(async (model) => {
+            const availableCount = await dbHelpers.GetEquipmentAvailableCount(db, model.modelId, model.typeId, startDate, endDate);
+            if (availableCount > 0) {
+                return {
+                    modelId: model.modelId,
+                    modelName: model.modelName,
+                    modelPhoto: model.modelPhoto,
+                    typeName: model.typeName,
+                    availableCount: availableCount,
+                };
+            }
+            return null;
+        });
 
-    /** Return Get Successful message with response to the client */
-    return responseBuilder.GetSuccessful(res, responseObject, "Available models");
-    } catch(error) {    
+        /** Wait for all promises to resolve */
+        const responseObject = (await Promise.all(availabilityPromises)).filter(result => result !== null);
+
+        /** Return Get Successful message with response to the client */
+        return responseBuilder.GetSuccessful(res, responseObject, "Available models");
+    } 
+    catch(error) {    
         /** Log error and return 503 */
         console.log("ERROR: There is an error while retrieving available models:", error);
         return responseBuilder.ServerError(res, "There is an error while retrieving available models/equipments.");

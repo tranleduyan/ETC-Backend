@@ -12,7 +12,6 @@ async function GetModelInfoByModelId(db, modelId) {
         /** Ensure model id is numeric */
         if(typeof modelId === "string" && isNaN(parseInt(modelId, 10))) {
             modelId = modelId.trim();
-            return "There is an error while retrieving model's information. Invalid request."
         }
 
         /** Retrieve model's information */
