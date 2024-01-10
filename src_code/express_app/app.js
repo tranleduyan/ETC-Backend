@@ -12,6 +12,7 @@ app.use(express.json());
 /** Import routes */
 const authenticationRoutes = require('../src/routes/AuthenticationRoutes');
 const inventoryRoutes = require('../src/routes/InventoryRoutes');
+const reservationRoutes = require('../src/routes/ReservationRoutes');
 
 /** Define the port */
 const PORT = 5000;
@@ -19,6 +20,7 @@ const PORT = 5000;
 /** Use the routes (Middleware) */
 app.use("/api/authentication", authenticationRoutes);
 app.use("/api/inventory", inventoryRoutes);
+app.use("/api/reservation", reservationRoutes);
 
 /** Start the server */
 app.listen(PORT, (err) => {

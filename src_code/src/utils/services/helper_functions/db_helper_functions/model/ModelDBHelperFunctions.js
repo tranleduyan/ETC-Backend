@@ -12,7 +12,6 @@ async function GetModelInfoByModelId(db, modelId) {
         /** Ensure model id is numeric */
         if(typeof modelId === "string" && isNaN(parseInt(modelId, 10))) {
             modelId = modelId.trim();
-            return "There is an error while retrieving model's information. Invalid request."
         }
 
         /** Retrieve model's information */
@@ -44,7 +43,34 @@ async function GetModelInfoByModelId(db, modelId) {
     }
 }
 
+async function GetEquipmentAvailableCount(db, modelId, typeId, startDate, endDate) {
+    try{
+        const allReadyEquipmentsPromise = db("equipment").select("PK_EQUIPMENT_SERIAL_ID").where({
+            FK_TYPE_ID: typeId,
+            FK_MODEL_ID: modelId,
+            MAINTENANCE_STATUS: "Ready"
+        });
+        const reservedEquipmentsCountPromise = db("reserved_equipment")
+        .leftJoin("reservation", "reserved_equipment.FK_RESERVATION_ID", "=", "reservation.PK_RESERVATION_ID")
+        .where("reserved_equipment.FK_EQUIPMENT_TYPE_ID", typeId)
+        .andWhere("reserved_equipment.FK_EQUIPMENT_MODEL_ID", modelId)
+        .andWhere("reservation.START_DATE", "<=", endDate)
+        .andWhere("reservation.END_DATE", ">=", startDate)
+        .sum("reserved_equipment.QUANTITY as totalQuantity")
+        .first();
+        const [allEquipments, reservedEquipmentsCount] = await Promise.all([allReadyEquipmentsPromise, reservedEquipmentsCountPromise]);
+        if(allEquipments.length === 0) {
+            return 0;
+        }
+        return allEquipments.length - reservedEquipmentsCount.totalQuantity;
+    } catch(error) {
+        console.log("ERROR: There is an error while retrieve equipment's availability:", error);
+        return "There is an error while retrieve equipment availability."
+    }
+}
+
 /** Export the modules */
 module.exports = {
-    GetModelInfoByModelId
+    GetModelInfoByModelId,
+    GetEquipmentAvailableCount
 }

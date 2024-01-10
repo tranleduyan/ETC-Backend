@@ -111,7 +111,7 @@ async function ModelAddition(res, req) {
         await helpers.DeleteDriveImage(drive, imageInfo?.imageId);
         /** Log error and return 503 */
         console.log("ERROR: There is an error occur while adding the model's information: ", error);
-        return responseBuilder.ServerError("There is an error occur while creating the model.");
+        return responseBuilder.ServerError(res, "There is an error occur while creating the model.");
     }
 }
 

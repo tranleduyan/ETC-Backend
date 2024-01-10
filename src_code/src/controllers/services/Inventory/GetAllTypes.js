@@ -15,7 +15,10 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  * Response object will be an array, and each item will have this: 
  * {
  *      typeId: int,
- *      typeName: string
+ *      typeName: string,
+ *      modelCount: int,
+ *      equipmentCount: int,
+ *      reserved: int,
  * }
  */
 async function GetAllTypes(res) {
@@ -39,6 +42,7 @@ async function GetAllTypes(res) {
               typeId: type.typeId,
               typeName: type.typeName,
               modelCount: typeInfo.models?.length,
+              equipmentCount: typeInfo.equipments?.length,
               reserved: typeInfo.reserved
             };
           });
