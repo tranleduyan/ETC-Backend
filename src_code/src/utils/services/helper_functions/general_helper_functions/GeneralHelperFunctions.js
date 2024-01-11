@@ -94,7 +94,7 @@ async function GenerateDriveImagePublicUrl(drive, imageDriveFileId) {
         });
 
         /** Once set the image to public, retrieve its data (include the image public url) */
-        const imageUrl = `https://drive.google.com/uc?id=${imageDriveFileId}`;
+        const imageUrl = `https://lh3.google.com/u/0/d/${imageDriveFileId}`;
 
         /** Return the image public url */
         return imageUrl;
