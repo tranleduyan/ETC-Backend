@@ -12,10 +12,10 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 /**
- *  POST/EQUIPMENT REMOVE
+ *  DELETE/EQUIPMENT REMOVE
  *  URL => /api/inventory/remove
  */
-router.post('/remove', async(request, response) => {
+router.delete('/remove', async(request, response) => {
     try{
         return await Promise.resolve(inventoryServices.EquipmentRemoval(response, request.body));
     }catch(error){
