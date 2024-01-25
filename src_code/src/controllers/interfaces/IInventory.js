@@ -1,4 +1,4 @@
-const updateToolService = require('../services/Inventory/UpdateTool');
+const updateEquipmentService = require('../services/Inventory/EquipmentUpdate');
 module.exports = {
-    UpdateTool: updateToolService.UpdateTool,
+    EquipmentUpdate: updateEquipmentService.EquipmentUpdate,
 }
