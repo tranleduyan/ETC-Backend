@@ -11,15 +11,45 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  * @returns {Promise<Object>} - A promise that resolves to an object representing any validation errors or rejection reason.
  * 
  * Expected Request Body: 
- * {
- *      "something": "wii-party"
- * }
+ *  {
+ *      "schoolId": "901234123",
+ *      "typeId": x (optional later),
+ *      "modelId": x (optional later),
+ *      "maintenanceStatus": "Ready" OR "Under Repair" (optional later),
+ *      "reservationStatus": "Available" OR "In Use" (optional later),
+ *      "usageCondition": "Used" OR "New" (optional later),
+ *      "purchaseCost": 1102.23 (optional),
+ *      "purchaseDate": "2016-12-08" (optional)
+ *  }
  * 
  * Response is the message with status code 200 if successfully
  * Else return a server error of status code 503 (see ResponsiveBuilder.js) - the error are trying to input invalid format to database or any thing else that cannot be seen forward
  */
 async function EquipmentUpdate(res, req, serialId) {
     try{
+        /** Validate information before communicate with database */
+        const errors = await Promise.resolve(EquipmentUpdateValidation(res, req, serialId));
+        if(errors) {
+            return errors;
+        }
+
+        /** Destructure variables from request body */
+        const { typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+
+        /** Update the equipment */
+        await db("equipment")
+            .update({ 
+                FK_TYPE_ID: typeId,
+                FK_MODEL_ID: modelId,
+                FK_CURRENT_ROOM_READER_ID: null,
+                TAG_ID: null,
+                MAINTENANCE_STATUS: maintenanceStatus.trim(),
+                RESERVATION_STATUS: reservationStatus.trim(),
+                USAGE_CONDITION: usageCondition.trim(),
+                PURCHASE_COST: purchaseCost,
+                PURCHASE_DATE: purchaseDate
+            })  
+            .where("PK_EQUIPMENT_SERIAL_ID", "=", serialId.trim());
 
         /** Return update successful message */
         return responseBuilder.UpdateSuccessful(res, null, "Equipment");
@@ -38,7 +68,50 @@ async function EquipmentUpdate(res, req, serialId) {
  */
 async function EquipmentUpdateValidation(res, req, serialId) {
     try{
+        /** Destructure variables from the request body */
+        const { schoolId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
         
+        /** We check for all required variables */
+        if(!schoolId || typeof(typeId) == "undefined" || typeof(modelId) == "undefined" || !maintenanceStatus || !reservationStatus || !usageCondition) {
+            return responseBuilder.MissingContent(res);
+        }
+
+        /** Ensure that school id is valid, and only admin can perform this action */
+        const userError = await Promise.resolve(gHelper.ValidateAdminUser(schoolId));
+        if(userError) {
+            return responseBuilder.BadRequest(res, userError);
+        }
+        
+        /** Validate serial, type, and model IDs */
+        const idError = await Promise.resolve(IdValidator(res, serialId, typeId, modelId));
+        if(idError){
+            return idError;
+        }
+
+        /** Validate maintenance, reservation, and usage condition statuses */
+        const statusError = StatusValidator(res, maintenanceStatus, reservationStatus, usageCondition);
+        if(statusError){
+            return statusError;
+        }
+
+        /** check if purchase cost is provided (optional param) */
+        if(purchaseCost) {
+            /** Validate purchase cost */
+            const purchaseCostError = PurchaseCostValidator(res, purchaseCost);
+            if(purchaseCostError) {
+                return purchaseCostError;
+            }
+        }
+
+        /** check if purchase date is provided (optional param) */
+        if(purchaseDate) {
+            
+            /** Validate purchase date */
+            const purchaseDateError = PurchaseDateValidator(res, purchaseDate);
+            if(purchaseDateError) {
+                return purchaseDateError;
+            }
+        }
         
         /** If all checks pass, return null to indicate validation success */
         return null;
