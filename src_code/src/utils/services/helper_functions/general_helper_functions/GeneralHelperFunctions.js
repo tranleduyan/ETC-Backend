@@ -2,6 +2,8 @@
 const nodemailer = require("nodemailer");
 const fs = require("fs");
 const path = require("path");
+const dbHelper = require("../../../../utils/interfaces/IDBHelperFunctions");
+const db = require("../../../../configurations/database/DatabaseConfigurations");
 
 /**
  * Sends a verification code to the specified email address.
@@ -236,6 +238,48 @@ async function RestoreDeletedDriveImage(drive, imageDriveFileId) {
     }
 }
 
+/** 
+ * Validates a user based on the provided school ID, checking for validity and admin privileges.
+ *
+ * @param {string} schoolId - The school ID associated with the user.
+ * @returns {string|null} - A validation message or null if the user is valid.
+ *    - Returns a string if there's an invalid request, error in retrieving user information,
+ *      user not found, or insufficient permissions.
+ *    - Returns null to indicate that the user is valid.
+ */
+async function ValidateAdminUser(schoolId) {
+    /** Ensure that schoolId should always be string */
+    if(typeof schoolId !== "string") {
+        return "Invalid type of school id.";
+    }
+        
+    /** Ensure school id is valid numeric */
+    if(isNaN(parseInt(schoolId, 10))) {
+        return "Invalid school id.";
+    }
+
+    /** Retrieve user information */
+    const user = await Promise.resolve(dbHelper.GetUserInfoBySchoolId(db, schoolId));
+
+    /** If there is error while retrieve user information, return error */
+    if(typeof user === "string") {
+        return user;
+    }
+
+    /** If user is not exist, return not found message */
+    if(!user) {
+        return "User not found.";
+    }
+
+    /** Ensure user is an admin */
+    if(user.userRole !== "Admin"){
+        return "You don't have permission to perform this action.";
+    }
+
+    /** Return null to indicate user is valid */
+    return null;
+}
+
 /** Exports the modules */
 module.exports = {
     SendVerificationCode,
@@ -243,4 +287,5 @@ module.exports = {
     DeleteDriveImage,
     DeleteDriveImages,
     RestoreDeletedDriveImage,
+    ValidateAdminUser
 }

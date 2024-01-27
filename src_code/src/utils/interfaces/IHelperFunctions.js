@@ -7,6 +7,7 @@ module.exports ={
     GenerateDriveImagePublicUrl: generalHelperFunctions.GenerateDriveImagePublicUrl,
     DeleteDriveImage: generalHelperFunctions.DeleteDriveImage,
     DeleteDriveImages: generalHelperFunctions.DeleteDriveImages,
-    RestoreDeletedDriveImage: generalHelperFunctions.RestoreDeletedDriveImage
+    RestoreDeletedDriveImage: generalHelperFunctions.RestoreDeletedDriveImage,
+    ValidateAdminUser: generalHelperFunctions.ValidateAdminUser
  }
  

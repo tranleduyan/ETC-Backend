@@ -221,7 +221,7 @@ async function EmailValidator(res, emailAddress) {
     }
 
     /** Retrieve user with the sign up email address to check for the uniqueness */
-    const isUserWithRequestEmail = await dbHelper.GetUserInfoByEmailAddress(db, emailAddress.trim());
+    const isUserWithRequestEmail = await Promise.resolve(dbHelper.GetUserInfoByEmailAddress(db, emailAddress.trim()));
 
     /** Check if the isUserWithRequestEmail is not null and if it type is string, return bad request */
     if(isUserWithRequestEmail && typeof isUserWithRequestEmail === "string") {
