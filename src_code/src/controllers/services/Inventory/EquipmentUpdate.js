@@ -35,14 +35,41 @@ async function EquipmentUpdate(res, req, serialId) {
 
         /** Destructure variables from request body */
         const { typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+        let equipmentInfo = {};
+        
+        if(typeId){
+            equipmentInfo["FK_TYPE_ID"] = typeId;
+        }
+
+        if(typeId){
+            equipmentInfo["FK_MODEL_ID"] = typeId;
+        }        
+        
+        if(typeId){
+            equipmentInfo["MAINTENANCE_STATUS"] = typeId;
+        }
+
+        if(typeId){
+            equipmentInfo["RESERVATION_STATUS"] = typeId;
+        }
+
+        if(typeId){
+            equipmentInfo["USAGE_CONDITION"] = typeId;
+        }
+
+        if(typeId){
+            equipmentInfo["PURCHASE_COST"] = typeId;
+        }
+
+        if(typeId){
+            equipmentInfo["PURCHASE_DATE"] = typeId;
+        }
 
         /** Update the equipment */
         await db("equipment")
             .update({ 
                 FK_TYPE_ID: typeId,
                 FK_MODEL_ID: modelId,
-                FK_CURRENT_ROOM_READER_ID: null,
-                TAG_ID: null,
                 MAINTENANCE_STATUS: maintenanceStatus.trim(),
                 RESERVATION_STATUS: reservationStatus.trim(),
                 USAGE_CONDITION: usageCondition.trim(),
