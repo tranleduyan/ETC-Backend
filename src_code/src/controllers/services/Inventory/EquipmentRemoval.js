@@ -4,7 +4,7 @@ const db = require("../../../configurations/database/DatabaseConfigurations");
 const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
 
 /**
- * Handle inventory Equipment Removal by adminstrator.
+ * Handle inventory Equipment Removal by administrator.
  *
  * @param {object} res - The response object for the HTTP request.
  * @param {object} req - The request object from the HTTP request.
@@ -12,15 +12,46 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  * 
  * Expected Request Body: 
  * {
- *      "Equipment": "item"
+ *      "schoolID": "810922119",
+ *      "items" : ["serialNUM1", "serialNUM2", ...]
  * }
  * 
- * Response is the message with status code 200 if successfully
- * Else return a server error of status code 503 (see ResponsiveBuilder.js) - the error are trying to input invalid format to database or any thing else that cannot be seen forward
+ * Response is the message with status code 200 if successful.
+ * Else return a server error of status code 503 (see ResponsiveBuilder.js)
  */
 async function EquipmentRemoval(res, req) {
+    try {
+        /** Validate information before processing removing type */
+        const errors = await Promise.resolve(EquipmentRemovalValidation(res, req));
+        if(errors) {
+            return responseBuilder.BadRequest(res, errors);
+        }
 
-    return null;
+        /** Open the transaction */
+        const trx = await db.transaction();
+
+        /** Destructure variables from request body */
+        const { itemId } = req;
+        
+        /** If items array is empty, there is nothing to do */
+        if(itemId.length === 0) {
+            await trx.commit();
+            return responseBuilder.DeleteSuccessful(res, "Equipment");
+        }
+
+        /** Delete the items from the equipment table */
+        await trx("equipment").whereIn("PK_EQUIPMENT_SERIAL_ID", itemId).del();
+
+        /** Commit the transaction */
+        await trx.commit();
+
+        /** Return delete successful */
+        return responseBuilder.DeleteSuccessful(res);
+    } catch(error) {
+        /** Log error and return 503 */
+        console.log("ERROR: There is an error while deleting items", error);
+        return responseBuilder.ServerError(res, "There is an error while deleting items.");
+    }
 }
 
 /**
@@ -28,8 +59,7 @@ async function EquipmentRemoval(res, req) {
  *
  * @param {Object} res - Express response object.
  * @param {Object} req - Express request object containing item ID
- * @returns {Object|null} - A response object representing validation errors if validation fails,
- *                         or null if the validation is successful.
+ * @returns {Object|null} - A response object representing validation errors if validation fails,or null if the validation is successful.
  */
 async function EquipmentRemovalValidation(res, req){    
     try {
@@ -42,9 +72,9 @@ async function EquipmentRemovalValidation(res, req){
         }
 
         /** Ensure that itemId is an array type */
-        // if(!Array.isArray(itemId)) {
-        //     return responseBuilder.BadRequest("Invalid request.");
-        // }
+        if(!Array.isArray(itemId)) {
+            return responseBuilder.BadRequest("Invalid request.");
+        }
 
         /** Ensure the user is valid */
         const userError = await Promise.resolve(ValidateUser(schoolId));
@@ -81,7 +111,7 @@ async function ValidateItem(itemId) {
     }
 
     /** Retrieve all the equipments to ensure that all the items exists */
-    const items = await db("equipment_type").select("PK_TYPE_ID").whereIn("PK_TYPE_ID", itemId);
+    const items = await db("equipment").select("PK_EQUIPMENT_SERIAL_ID").whereIn("PK_EQUIPMENT_SERIAL_ID", itemId);
 
     /** Ensure that all the items exists */
     if(items.length !== itemId.length) {

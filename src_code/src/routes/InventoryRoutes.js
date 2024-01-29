@@ -14,6 +14,9 @@ const upload = multer({ storage: storage });
 /**
  *  DELETE/EQUIPMENT REMOVE
  *  URL => /api/inventory/remove
+ * 
+ *      "schoolId": string,
+ *      "itemId": serial
  */
 router.delete('/remove', async(request, response) => {
     try{
