@@ -74,9 +74,7 @@ function DatePeriodValidation(startDate, endDate) {
     const endDateTime = new Date(endDate);
     const today = new Date();
     
-    // Set time components to midnight for comparison
     today.setHours(0, 0, 0, 0);
-    today.setDate(0);
 
     /** Ensure startDate and endDate are valid date forms */
     if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {

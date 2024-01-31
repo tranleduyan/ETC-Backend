@@ -459,9 +459,7 @@ function PurchaseDateValidator(res, purchaseDate){
     const purchaseDateTime = new Date(purchaseDate);
     const today = new Date();
 
-    /** Set time to midnight (for comparison) */
     today.setHours(0, 0, 0, 0);
-    today.setDate(0);
 
     /** Ensure purchase date is a valid date value */
     if (isNaN(purchaseDateTime.getTime())) {
