@@ -2,7 +2,6 @@
 const express = require('express');
 const responseBuilder = require('../utils/interfaces/IResponseBuilder');
 const inventoryServices = require('../controllers/interfaces/IInventory');
-const multer = require("multer");
 
 /** Initialize router for the route */
 const router = express.Router();
