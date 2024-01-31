@@ -37,6 +37,7 @@ async function EquipmentUpdate(res, req, serialId) {
         const { typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
         let equipmentInfo = {};
         
+        /** Checking if optional variables exist (and if so, add to update request) */
         if(typeId){
             equipmentInfo["FK_TYPE_ID"] = typeId;
         }
