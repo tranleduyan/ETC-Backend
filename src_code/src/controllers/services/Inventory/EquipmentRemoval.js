@@ -46,7 +46,7 @@ async function EquipmentRemoval(res, req) {
         await trx.commit();
 
         /** Return delete successful */
-        return responseBuilder.DeleteSuccessful(res);
+        return responseBuilder.DeleteSuccessful(res,  "Equipment");
     } catch(error) {
         /** Log error and return 503 */
         console.log("ERROR: There is an error while deleting items", error);
