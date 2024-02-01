@@ -94,6 +94,5 @@ async function GetUserInfoBySchoolId(db, schoolId) {
 
 module.exports ={
     GetUserInfoByEmailAddress,
-    GetUserInfoBySchoolId,
-
+    GetUserInfoBySchoolId
 }
