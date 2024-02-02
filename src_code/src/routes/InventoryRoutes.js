@@ -481,5 +481,34 @@ router.get("/available-models", async(request, response) => {
     }
 })
 
+/**
+ * GET/RETRIEVE EQUIPMENT Information
+ * URL => /api/inventory/equipment/{serialId}
+ */
+router.get("/equipment/:serialId", async (request, response) => {
+    try{
+        const serialId = request.params.serialId;
+        /** Perform get equipment information */
+        return await Promise.resolve(inventoryServices.GetEquipmentInformation(response, serialId));
+    } catch(error) {
+        console.log("ERROR: There is an error while retrieving all equipment:", error);
+        return responseBuilder.ServerError(res, "There is an error while retrieving all equipment.");
+    }
+})
+
+/**
+ * GET/RETRIEVE ALL EQUIPMENT 
+ * URL => /api/inventory/equipment
+ */
+router.get("/equipment", async (_, response) => {
+    try{
+        /** Perform get all equipment */
+        return await Promise.resolve(inventoryServices.GetAllEquipment(response));
+    } catch(error) {
+        console.log("ERROR: There is an error while retrieving all equipment:", error);
+        return responseBuilder.ServerError(res, "There is an error while retrieving all equipment.");
+    }
+})
+
 /** Exports the router */
 module.exports = router;
