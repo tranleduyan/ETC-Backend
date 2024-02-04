@@ -22,6 +22,7 @@ async function GetAllEquipment(res) {
             .from("equipment_model")
             .leftJoin("equipment_type", "equipment_type.PK_TYPE_ID", "=", "equipment_model.FK_TYPE_ID")
             .leftJoin("equipment", "equipment.FK_MODEL_ID", "=", "equipment_model.PK_MODEL_ID")
+            .whereNotNull("equipment.PK_EQUIPMENT_SERIAL_ID")
             .orderBy("typeName")
             .orderBy("modelName")
             .orderBy("serialId");
