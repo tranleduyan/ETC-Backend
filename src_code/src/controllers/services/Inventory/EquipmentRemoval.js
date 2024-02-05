@@ -12,8 +12,8 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  * 
  * Expected Request Body: 
  * {
- *      "schoolID": "810922119",
- *      "items" : ["serialNUM1", "serialNUM2", ...]
+ *      "schoolId": "810922119",
+ *      "serialId" : ["serialNUM1", "serialNUM2", ...]
  * }
  * 
  * Response is the message with status code 200 if successful.
@@ -21,7 +21,7 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  */
 async function EquipmentRemoval(res, req) {
     try {
-        /** Validate information before processing removing type */
+        /** Validate information before processing removing an equipment */
         const errors = await Promise.resolve(EquipmentRemovalValidation(res, req));
         if(errors) {
             return responseBuilder.BadRequest(res, errors);
@@ -31,16 +31,16 @@ async function EquipmentRemoval(res, req) {
         const trx = await db.transaction();
 
         /** Destructure variables from request body */
-        const { itemId } = req;
+        const { serialId } = req;
         
-        /** If items array is empty, there is nothing to do */
-        if(itemId.length === 0) {
+        /** If items serial array is empty, there is nothing to do */
+        if(serialId.length === 0) {
             await trx.commit();
             return responseBuilder.DeleteSuccessful(res, "Equipment");
         }
 
-        /** Delete the items from the equipment table */
-        await trx("equipment").whereIn("PK_EQUIPMENT_SERIAL_ID", itemId).del();
+        /** Delete the items based on their serialId from the equipment table */
+        await trx("equipment").whereIn("PK_EQUIPMENT_SERIAL_ID", serialId).del();
 
         /** Commit the transaction */
         await trx.commit();
@@ -55,24 +55,24 @@ async function EquipmentRemoval(res, req) {
 }
 
 /**
- * Validates the request parameters for single equipment removal.
+ * Validates the request parameters for single equipment removal and multiple removal.
  *
  * @param {Object} res - Express response object.
- * @param {Object} req - Express request object containing item ID
+ * @param {Object} req - Express request object containing serial ID and school ID
  * @returns {Object|null} - A response object representing validation errors if validation fails,or null if the validation is successful.
  */
 async function EquipmentRemovalValidation(res, req){    
     try {
         /** Destructure the variables from request body */
-        const { itemId, schoolId } = req;
+        const { serialId, schoolId } = req;
 
         /** Ensure the required fields is filled */
-        if(!itemId || !schoolId) {
+        if(!serialId || !schoolId) {
             return responseBuilder.MissingContent(res);
         }
 
-        /** Ensure that itemId is an array type */
-        if(!Array.isArray(itemId)) {
+        /** Ensure that serialId is an array type */
+        if(!Array.isArray(serialId)) {
             return responseBuilder.BadRequest("Invalid request.");
         }
 
@@ -83,7 +83,7 @@ async function EquipmentRemovalValidation(res, req){
         }
 
         /** Ensure the item is valid */
-        const itemError = await Promise.resolve(ValidateItem(itemId));
+        const itemError = await Promise.resolve(ValidateItem(serialId));
         if(itemError) {
             return responseBuilder.BadRequest(res, itemError);
         }
@@ -92,33 +92,33 @@ async function EquipmentRemovalValidation(res, req){
         return null;
     } catch(error) {
         /** Log error and return 503 */
-        console.log("ERROR: There is an error occur while validating single item removal:", error);
+        console.log("ERROR: There is an error occur while validating item removal:", error);
         return responseBuilder.ServerError(res, "There is an error occur while removing an item.");
     }
 }
 
 /**
- * Validates an array of equipment IDs.
+ * Validates an array of serial IDs.
  *
- * @param {Array} itemId - An array of equipment IDs to be validated.
+ * @param {Array} serialId - An array of serial IDs to be validated.
  * @returns {string|null} - A validation error message if validation fails,
  *                          or null if the validation is successful.
  */
-async function ValidateItem(itemId) {
-    /** If the array of type IDs is empty, there is nothing to do with it */
-    if(itemId.length === 0) {
+async function ValidateItem(serialId) {
+    /** If the array of serial IDs is empty, there is nothing to do with it */
+    if(serialId.length === 0) {
         return null;
     }
 
     /** Retrieve all the equipments to ensure that all the items exists */
-    const items = await db("equipment").select("PK_EQUIPMENT_SERIAL_ID").whereIn("PK_EQUIPMENT_SERIAL_ID", itemId);
+    const items = await db("equipment").select("PK_EQUIPMENT_SERIAL_ID").whereIn("PK_EQUIPMENT_SERIAL_ID", serialId);
 
     /** Ensure that all the items exists */
-    if(items.length !== itemId.length) {
+    if(items.length !== serialId.length) {
         return "One of the given item cannot be found."
     }
 
-    /** Return null to indicate itemIds are valid */
+    /** Return null to indicate serialId are valid */
     return null;
 }
 
@@ -166,6 +166,5 @@ async function ValidateUser(schoolId) {
 
 /** Exports the module/functions */
 module.exports = {
-    EquipmentRemoval,
-    EquipmentRemovalValidation
+    EquipmentRemoval
 }
