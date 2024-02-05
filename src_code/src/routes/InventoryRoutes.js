@@ -21,7 +21,7 @@ const router = express.Router();
  *      "purchaseDate": date (optional)
  *  }
  * 
- * @return 404 if failed validation
+ * @return 404 or 400 if failed validation
  * @return 503 if server error
  * @return 200 OK 
  * {

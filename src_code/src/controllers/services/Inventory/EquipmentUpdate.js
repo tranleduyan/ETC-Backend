@@ -266,9 +266,9 @@ async function SerialIdValidator(res, serialId) {
         return responseBuilder.BadRequest(res, equipmentWithSerialId);
     }
 
-    /** If there is already a equipment with the serial ID, return bad request */
-    if(equipmentWithSerialId) { 
-        return responseBuilder.BadRequest(res,"The serial ID is already in use.");
+    /** If there is no equipment with the serial ID, return not found */
+    if(!equipmentWithSerialId) { 
+        return responseBuilder.NotFound(res,`Equipment with serial ID ${serialIdTemp}`);
     }
 
     /** Indicate pass the validation */
