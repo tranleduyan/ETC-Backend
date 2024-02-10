@@ -20,6 +20,9 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  * Else return a server error of status code 503 (see ResponsiveBuilder.js)
  */
 async function EquipmentRemoval(res, req) {
+    /** Open the transaction */
+    const trx = await db.transaction();
+
     try {
         /** Validate information before processing removing an equipment */
         const errors = await Promise.resolve(EquipmentRemovalValidation(res, req));
@@ -27,17 +30,8 @@ async function EquipmentRemoval(res, req) {
             return responseBuilder.BadRequest(res, errors);
         }
 
-        /** Open the transaction */
-        const trx = await db.transaction();
-
         /** Destructure variables from request body */
         const { serialId } = req;
-        
-        /** If items serial array is empty, there is nothing to do */
-        if(serialId.length === 0) {
-            await trx.commit();
-            return responseBuilder.DeleteSuccessful(res, "Equipment");
-        }
 
         /** Delete the items based on their serialId from the equipment table */
         await trx("equipment").whereIn("PK_EQUIPMENT_SERIAL_ID", serialId).del();
@@ -48,6 +42,9 @@ async function EquipmentRemoval(res, req) {
         /** Return delete successful */
         return responseBuilder.DeleteSuccessful(res,  "Equipment");
     } catch(error) {
+        /** Rollback transaction if failed */
+        await trx.rollback();
+
         /** Log error and return 503 */
         console.log("ERROR: There is an error while deleting items", error);
         return responseBuilder.ServerError(res, "There is an error while deleting items.");
@@ -67,13 +64,17 @@ async function EquipmentRemovalValidation(res, req){
         const { serialId, schoolId } = req;
 
         /** Ensure the required fields is filled */
-        if(!serialId || !schoolId) {
+        if(!schoolId) {
             return responseBuilder.MissingContent(res);
         }
 
         /** Ensure that serialId is an array type */
         if(!Array.isArray(serialId)) {
             return responseBuilder.BadRequest("Invalid request.");
+        }
+
+        if(serialId?.length === 0) {
+            return responseBuilder.DeleteSuccessful(res, "Equipment");
         }
 
         /** Ensure the user is valid */
@@ -105,16 +106,12 @@ async function EquipmentRemovalValidation(res, req){
  *                          or null if the validation is successful.
  */
 async function ValidateItem(serialId) {
-    /** If the array of serial IDs is empty, there is nothing to do with it */
-    if(serialId.length === 0) {
-        return null;
-    }
 
     /** Retrieve all the equipments to ensure that all the items exists */
     const items = await db("equipment").select("PK_EQUIPMENT_SERIAL_ID").whereIn("PK_EQUIPMENT_SERIAL_ID", serialId);
 
     /** Ensure that all the items exists */
-    if(items.length !== serialId.length) {
+    if(items?.length !== serialId.length) {
         return "One of the given item cannot be found."
     }
 
