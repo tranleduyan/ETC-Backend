@@ -62,15 +62,8 @@ router.post('/equipment', async(request, response) => {
 })
 
 /**
- *  DELETE/EQUIPMENT REMOVE SINGLE/MULTIPLE
+ *  DELETE/EQUIPMENT REMOVE
  *  URL => /api/inventory/equipment
- * 
- *      "schoolId": string,
- *      "serialId": ["serialNum", "serialNum", ...]
- * 
- *  @return 400 (If failed validation)
- *          503 (If server error) 
- *          200 (Delete Successful)
  */
 router.delete('/equipment', async(request, response) => {
     try{
@@ -485,6 +478,35 @@ router.get("/available-models", async(request, response) => {
         console.log("ERROR: There is an error while retrieving model's information:", error);
         /** Response error message to the client */
         return responseBuilder.ServerError(response, "There is an error while retrieving model's information.");
+    }
+})
+
+/**
+ * GET/RETRIEVE EQUIPMENT Information
+ * URL => /api/inventory/equipment/{serialId}
+ */
+router.get("/equipment/:serialId", async (request, response) => {
+    try{
+        const serialId = request.params.serialId;
+        /** Perform get equipment information */
+        return await Promise.resolve(inventoryServices.GetEquipmentInformation(response, serialId));
+    } catch(error) {
+        console.log("ERROR: There is an error while retrieving all equipment:", error);
+        return responseBuilder.ServerError(res, "There is an error while retrieving all equipment.");
+    }
+})
+
+/**
+ * GET/RETRIEVE ALL EQUIPMENT 
+ * URL => /api/inventory/equipment
+ */
+router.get("/equipment", async (_, response) => {
+    try{
+        /** Perform get all equipment */
+        return await Promise.resolve(inventoryServices.GetAllEquipment(response));
+    } catch(error) {
+        console.log("ERROR: There is an error while retrieving all equipment:", error);
+        return responseBuilder.ServerError(res, "There is an error while retrieving all equipment.");
     }
 })
 

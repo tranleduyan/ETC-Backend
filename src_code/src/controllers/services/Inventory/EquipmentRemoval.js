@@ -27,7 +27,7 @@ async function EquipmentRemoval(res, req) {
         /** Validate information before processing removing an equipment */
         const errors = await Promise.resolve(EquipmentRemovalValidation(res, req));
         if(errors) {
-            return responseBuilder.BadRequest(res, errors);
+            return errors;
         }
 
         /** Destructure variables from request body */
