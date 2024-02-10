@@ -63,7 +63,7 @@ router.post('/equipment', async(request, response) => {
 
 /**
  *  DELETE/EQUIPMENT REMOVE SINGLE/MULTIPLE
- *  URL => /api/inventory/remove
+ *  URL => /api/inventory/equipment
  * 
  *      "schoolId": string,
  *      "serialId": ["serialNum", "serialNum", ...]
@@ -72,7 +72,7 @@ router.post('/equipment', async(request, response) => {
  *          503 (If server error) 
  *          200 (Delete Successful)
  */
-router.delete('/remove', async(request, response) => {
+router.delete('/equipment', async(request, response) => {
     try{
         return await Promise.resolve(inventoryServices.EquipmentRemoval(response, request.body));
     }catch(error){
