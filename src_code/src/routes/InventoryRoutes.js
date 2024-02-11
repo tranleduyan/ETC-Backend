@@ -64,6 +64,24 @@ router.post('/equipment', async(request, response) => {
 /**
  *  DELETE/EQUIPMENT REMOVE
  *  URL => /api/inventory/equipment
+ *  requestBody:
+ *  {
+ *      "schoolId": string,
+ *      "serialId": array (string)
+ *  }
+ * 
+ *  @return 400 (Failed Validation): 
+ *  {
+ *      "message": string
+ *  }
+ *  @return 503 (Server Error):
+ *  {
+ *      "message":  string
+ *  }
+ *  @return 200:
+ *  {
+ *      "message": string
+ *  }
  */
 router.delete('/equipment', async(request, response) => {
     try{
