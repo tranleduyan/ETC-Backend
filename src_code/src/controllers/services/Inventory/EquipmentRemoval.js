@@ -70,7 +70,7 @@ async function EquipmentRemovalValidation(res, req){
 
         /** Ensure that serialId is an array type */
         if(!Array.isArray(serialId)) {
-            return responseBuilder.BadRequest("Invalid request.");
+            return responseBuilder.BadRequest(res, "Invalid request.");
         }
 
         if(serialId?.length === 0) {
