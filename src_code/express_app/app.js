@@ -15,7 +15,7 @@ const inventoryRoutes = require('../src/routes/InventoryRoutes');
 const reservationRoutes = require('../src/routes/ReservationRoutes');
 
 /** Define the port */
-const PORT = 5000;
+const PORT = 5001;
 
 /** Use the routes (Middleware) */
 app.use("/api/authentication", authenticationRoutes);
@@ -23,6 +23,7 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/reservation", reservationRoutes);
 
 /** Start the server */
+/** changing to 5001 for development */
 app.listen(PORT, (err) => {
   if (err) {
     console.error("ERROR STARTING SERVER DUE TO: ", err);

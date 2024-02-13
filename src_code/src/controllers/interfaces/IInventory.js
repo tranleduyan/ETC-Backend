@@ -13,6 +13,7 @@ const TypeUpdateServices = require("../services/Inventory/TypeUpdate");
 const ModelUpdateServices = require("../services/Inventory/ModelUpdate");
 const GetAllModelsServices = require("../services/Inventory/GetAllModels");
 const GetAvailableModelsServices = require("../services/Inventory/GetAvailableModels");
+const ScanAdditionService = require("../services/Inventory/AntennaScan");
 
 /** Exports the module */
 module.exports = {
@@ -29,5 +30,6 @@ module.exports = {
     TypeUpdate: TypeUpdateServices.TypeUpdate, 
     ModelUpdate: ModelUpdateServices.ModelUpdate,
     GetAllModels: GetAllModelsServices.GetAllModels,
-    GetAvailableModels: GetAvailableModelsServices.GetAvailableModels
+    GetAvailableModels: GetAvailableModelsServices.GetAvailableModels,
+    AntennaScan: ScanAdditionService.AntennaScan
 }

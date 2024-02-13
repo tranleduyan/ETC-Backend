@@ -481,5 +481,42 @@ router.get("/available-models", async(request, response) => {
     }
 })
 
+/**
+ * POST/SCAN LOG ADDITION
+ * URL => /api/inventory/scans
+ * requestBody:
+ * {
+ *      "scanData": string,
+ *      "scanTime": time
+ * }
+ * 
+ * @return 400 (If failed validation)
+ *         503 (If server error) 
+ *         200 (Success OK)
+ */
+
+router.post("/scan", async(request, response) => {
+    try{
+        /** Retrieve values from query parameters */
+        const startDate = request.query.startDate;
+        const endDate = request.query.endDate;
+        /** Perform add scan */
+        return await Promise.resolve(inventoryServices.AntennaScan(response, startDate, endDate));
+
+    } catch (error) {
+         /** log unexpected error for debugging */
+         console.log("ERROR: There is an error while logging new scan:", error);
+         /** Response error message to the client */
+         return responseBuilder.ServerError(response, "There is an error while logging a new scan.");
+    }
+
+
+})
+
+
+
+
+
+
 /** Exports the router */
 module.exports = router;
