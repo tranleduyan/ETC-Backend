@@ -33,23 +33,31 @@ async function AntennaScan(res, req) {
         /** Validate before communicate with database */
         // const error = await Promise.resolve(NewScanValidation(res, req));
         
-        if(error) {
-            return error;
-        }
+        // if(error) {
+        //     return error;
+        // }
+
+
+        console.log("Scan info validated");
 
         /** Scan info validated successfully, procceed to communicate with database */
-        const { cardData, scanTime } = req.body;
+        /** If validation pass, we need to destructure variables (see above) from the request body for use. */
+        const { scanData, scanTime } = req.body;
 
+
+        console.log("Const created successfully");
         /** Prepare model's information/data for insert into model table */
         /**TODO create log history database */
-        const scanData = {
-            SCAN_DATA: cardData,
+        const insertData = {
+            SCAN_DATA: scanData,
             SCAN_TIME: scanTime,
 
         };
 
+        console.log("Created insertData");
+
         /** Add new log to scan log database */
-        await db("scan_history").insert(scanData);
+        await db("scan_history").insert(insertData);
 
         /** If create successfully, then return create successful message with entity 'Model' */
         return responseBuilder.CreateSuccessful(res, null, "Model");
@@ -151,10 +159,10 @@ async function ValidateUser(schoolId) {
 async function NewScanValidation(res, req) {
     try{
         /** Destructure variables from the request body */
-        const { cardData, scanTime} = req.body;
+        const { scanData, scanTime} = req.body;
 
         /** Ensure all required fields are provided with information */
-        if(!cardData || !scanTime) {
+        if(!scanData || !scanTime) {
             return responseBuilder.MissingContent(res);
         }
 

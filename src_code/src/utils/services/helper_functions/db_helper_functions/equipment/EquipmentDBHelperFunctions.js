@@ -59,7 +59,7 @@ async function GetEquipmentBySerialId(db, serialId) {
  * @returns {object|null|string} - If the type is found, returns an object containing type information;
  *                                 if not found, returns null; if an error occurs, returns an error message string.
  */
-async function AddScanToDatabase(db, scanData, scanTime) {
+async function AddScanToDatabase(db, scanData) {
     
 }
 
