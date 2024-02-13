@@ -4,7 +4,7 @@ const db = require("../../../configurations/database/DatabaseConfigurations");
 const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
 
 /**
- * Handle inventory Equipment Removal by adminstrator.
+ * Handle inventory Equipment Removal by administrator.
  *
  * @param {object} res - The response object for the HTTP request.
  * @param {object} req - The request object from the HTTP request.
@@ -12,13 +12,152 @@ const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
  * 
  * Expected Request Body: 
  * {
- *      "Equipment": "Type"
+ *      "schoolId": "810922119",
+ *      "serialId" : ["serialNUM1", "serialNUM2", ...]
  * }
  * 
- * Response is the message with status code 200 if successfully
- * Else return a server error of status code 503 (see ResponsiveBuilder.js) - the error are trying to input invalid format to database or any thing else that cannot be seen forward
+ * Response is the message with status code 200 if successful.
+ * Else return a server error of status code 503 (see ResponsiveBuilder.js)
  */
 async function EquipmentRemoval(res, req) {
+    /** Open the transaction */
+    const trx = await db.transaction();
+
+    try {
+        /** Validate information before processing removing an equipment */
+        const errors = await Promise.resolve(EquipmentRemovalValidation(res, req));
+        if(errors) {
+            return errors;
+        }
+
+        /** Destructure variables from request body */
+        const { serialId } = req;
+
+        /** Delete the items based on their serialId from the equipment table */
+        await trx("equipment").whereIn("PK_EQUIPMENT_SERIAL_ID", serialId).del();
+
+        /** Commit the transaction */
+        await trx.commit();
+
+        /** Return delete successful */
+        return responseBuilder.DeleteSuccessful(res,  "Equipment");
+    } catch(error) {
+        /** Rollback transaction if failed */
+        await trx.rollback();
+
+        /** Log error and return 503 */
+        console.log("ERROR: There is an error while deleting items", error);
+        return responseBuilder.ServerError(res, "There is an error while deleting items.");
+    }
+}
+
+/**
+ * Validates the request parameters for single equipment removal and multiple removal.
+ *
+ * @param {Object} res - Express response object.
+ * @param {Object} req - Express request object containing serial ID and school ID
+ * @returns {Object|null} - A response object representing validation errors if validation fails,or null if the validation is successful.
+ */
+async function EquipmentRemovalValidation(res, req){    
+    try {
+        /** Destructure the variables from request body */
+        const { serialId, schoolId } = req;
+
+        /** Ensure the required fields is filled */
+        if(!schoolId) {
+            return responseBuilder.MissingContent(res);
+        }
+
+        /** Ensure that serialId is an array type */
+        if(!Array.isArray(serialId)) {
+            return responseBuilder.BadRequest(res, "Invalid request.");
+        }
+
+        if(serialId?.length === 0) {
+            return responseBuilder.DeleteSuccessful(res, "Equipment");
+        }
+
+        /** Ensure the user is valid */
+        const userError = await Promise.resolve(ValidateUser(schoolId));
+        if(userError) {
+            return responseBuilder.BadRequest(res, userError);
+        }
+
+        /** Ensure the item is valid */
+        const itemError = await Promise.resolve(ValidateItem(serialId));
+        if(itemError) {
+            return responseBuilder.BadRequest(res, itemError);
+        }
+
+        /** Return null to indicate pass validation */
+        return null;
+    } catch(error) {
+        /** Log error and return 503 */
+        console.log("ERROR: There is an error occur while validating item removal:", error);
+        return responseBuilder.ServerError(res, "There is an error occur while removing an item.");
+    }
+}
+
+/**
+ * Validates an array of serial IDs.
+ *
+ * @param {Array} serialId - An array of serial IDs to be validated.
+ * @returns {string|null} - A validation error message if validation fails,
+ *                          or null if the validation is successful.
+ */
+async function ValidateItem(serialId) {
+
+    /** Retrieve all the equipments to ensure that all the items exists */
+    const items = await db("equipment").select("PK_EQUIPMENT_SERIAL_ID").whereIn("PK_EQUIPMENT_SERIAL_ID", serialId);
+
+    /** Ensure that all the items exists */
+    if(items?.length !== serialId.length) {
+        return "One of the given item cannot be found."
+    }
+
+    /** Return null to indicate serialId are valid */
+    return null;
+}
+
+/**
+ * Validates a user based on the provided school ID, checking for validity and admin privileges.
+ *
+ * @param {string} schoolId - The school ID associated with the user.
+ * @returns {string|null} - A validation message or null if the user is valid.
+ *    - Returns a string if there's an invalid request, error in retrieving user information,
+ *      user not found, or insufficient permissions.
+ *    - Returns null to indicate that the user is valid.
+ */
+async function ValidateUser(schoolId) {
+    /** Ensure that schoolId should always be string */
+    if(typeof schoolId !== "string") {
+        return "Invalid type of school id.";
+    }
+
+    /** Ensure school id is valid numeric */
+    if(isNaN(parseInt(schoolId, 10))) {
+        return "Invalid school id.";
+    }
+
+    /** Retrieve user information */
+    const user = await Promise.resolve(dbHelper.GetUserInfoBySchoolId(db, schoolId));
+
+    /** If there is error while retrieve user information, return error */
+    if(typeof user === "string") {
+        return user;
+    }
+
+    /** If user is not exist, return not found message */
+    if(!user) {
+        return "User not found.";
+    }
+
+    /** Ensure user is an admin */
+    if(user.userRole !== "Admin"){
+        return "You don't have permission to perform this action.";
+    }
+
+    /** Return null to indicate user is valid */
     return null;
 }
 

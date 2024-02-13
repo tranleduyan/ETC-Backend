@@ -64,6 +64,24 @@ router.post('/equipment', async(request, response) => {
 /**
  *  DELETE/EQUIPMENT REMOVE
  *  URL => /api/inventory/equipment
+ *  requestBody:
+ *  {
+ *      "schoolId": string,
+ *      "serialId": array (string)
+ *  }
+ * 
+ *  @return 400 (Failed Validation): 
+ *  {
+ *      "message": string
+ *  }
+ *  @return 503 (Server Error):
+ *  {
+ *      "message":  string
+ *  }
+ *  @return 200:
+ *  {
+ *      "message": string
+ *  }
  */
 router.delete('/equipment', async(request, response) => {
     try{
@@ -278,7 +296,7 @@ router.get("/models/:modelId", async(request, response) => {
     try{ 
         /** If there is no request body, then we return the request body is empty */
         const modelId = request.params.modelId;
-        /** Perform delete models */
+        /** Perform get information of model */
         return await Promise.resolve(inventoryServices.GetModelInformation(response, modelId));
     } catch(error) {
         /** Logging unexpected error. help for debug */
@@ -438,7 +456,7 @@ router.put("/models/:modelId", upload.single('image'), async(request, response) 
  */
 router.get("/models", async(request, response) => {
     try{ 
-        /** Perform delete models */
+        /** Perform get models */
         return await Promise.resolve(inventoryServices.GetAllModels(response));
     } catch(error) {
         /** Logging unexpected error. help for debug */
@@ -471,7 +489,7 @@ router.get("/available-models", async(request, response) => {
         /** Retrieve values from query parameters */
         const startDate = request.query.startDate;
         const endDate = request.query.endDate;
-        /** Perform delete models */
+        /** Perform get available models */
         return await Promise.resolve(inventoryServices.GetAvailableModels(response, startDate, endDate));
     } catch(error) {
         /** Logging unexpected error. help for debug */

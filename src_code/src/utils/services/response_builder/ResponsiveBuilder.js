@@ -178,7 +178,7 @@ function BuildResponse(res, statusCode, body) {
       responseMessage = "An entity";
     }
     /** Create and return response message */
-    return BuildResponse(res, 204, {
+    return BuildResponse(res, 200, {
       message: `${responseMessage} successfully deleted.`,
     });
   }
