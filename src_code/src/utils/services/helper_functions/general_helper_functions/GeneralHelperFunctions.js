@@ -164,7 +164,7 @@ async function DeleteDriveImage(drive, imageDriveFileId) {
 
         /** Retrieve the file metadata to check if the image exists */
         const imageFile = await drive.files.get({ fileId: imageDriveFileId });
-        if (!imageFile || !imageFile.data) {
+        if (!imageFile || !imageFile.data) { // use ?. optional chaining???
             return null;
         }
 
@@ -206,7 +206,7 @@ async function DeleteDriveImages(drive, imageDriveFileIds) {
                  const imageFile = await drive.files.get({ fileId: fileId });
 
                  /** If the image file is not found, log an error and skip deletion */
-                 if (!imageFile || !imageFile.data) {
+                 if (!imageFile || !imageFile.data) { // use ?. optional chaining???
                      console.log(`ERROR: Image with ID ${fileId} not found.`);
                      return `Image with ID ${fileId} not found.`;
                  }
@@ -259,7 +259,7 @@ async function RestoreDeletedDriveImage(drive, imageDriveFileId) {
 
         /** Retrieve the file metadata to check if the image exists */
         const imageFile = await drive.files.get({ fileId: imageDriveFileId });
-        if (!imageFile || !imageFile.data) {
+        if (!imageFile || !imageFile.data) { // use ?. optional chaining???
             return null;
         }
 
