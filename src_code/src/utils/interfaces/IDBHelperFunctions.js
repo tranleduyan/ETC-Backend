@@ -13,5 +13,7 @@ module.exports = {
     GetTypeInfoByTypeId: typeDBHelperFunctions.GetTypeInfoByTypeId,
     GetModelInfoByModelId: modelDBHelperFunctions.GetModelInfoByModelId,
     GetEquipmentAvailableCount: modelDBHelperFunctions.GetEquipmentAvailableCount,
+    GetModelById: userDBHelperFunctions.GetModelById,
+    GetTypeById: typeDBHelperFunctions.GetTypeById,
     GetEquipmentBySerialId: equipmentDBHelperFunctions.GetEquipmentBySerialId
 }

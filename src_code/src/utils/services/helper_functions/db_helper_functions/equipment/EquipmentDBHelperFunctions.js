@@ -6,40 +6,76 @@
  */
 async function GetEquipmentBySerialId(db, serialId) {
     try{
-        /** Initialize an object by query to get tool information */
-        const equipment = await db.select(
-            "PK_EQUIPMENT_SERIAL_ID",
-            "FK_TYPE_ID", 
-            "FK_MODEL_ID",
-            "FK_CURRENT_ROOM_READER_ID",
-            "TAG_ID",
-            "MAINTENANCE_STATUS",
-            "RESERVATION_STATUS",
-            "USAGE_CONDITION",
-            "PURCHASE_COST",
-            "PURCHASE_DATE",
-        ).from("equipment").where("PK_EQUIPMENT_SERIAL_ID", "=", serialId.trim()).first();
+        /** Create promise to get equipment information */
+        const getEquipmentInformationPromise = db
+            .select(
+                "equipment_model.MODEL_PHOTO_URL AS modelPhoto",
+                "equipment_type.PK_TYPE_ID AS typeId",
+                "equipment_type.TYPE_NAME AS typeName",
+                "equipment_model.PK_MODEL_ID AS modelId",
+                "equipment_model.MODEL_NAME AS modelName",
+                "equipment.PK_EQUIPMENT_SERIAL_ID AS serialId",
+                "equipment.MAINTENANCE_STATUS AS maintenanceStatus",
+                "equipment.RESERVATION_STATUS AS reservationStatus",
+                "equipment.USAGE_CONDITION AS usageCondition",
+                "equipment.PURCHASE_COST AS purchaseCost",
+                "equipment.PURCHASE_DATE AS purchaseDate",
+                "equipment.TAG_ID AS rfidTag",
+                "room.ROOM_NUMBER AS currentRoom"
+            )
+            .from("equipment_model")
+            .leftJoin("equipment_type", "equipment_type.PK_TYPE_ID", "=", "equipment_model.FK_TYPE_ID")
+            .leftJoin("equipment", "equipment.FK_MODEL_ID", "=", "equipment_model.PK_MODEL_ID")
+            .leftJoin("room", "equipment.FK_CURRENT_ROOM_READER_ID", "=", "room.PK_READER_TAG_ID")
+            .where("equipment.PK_EQUIPMENT_SERIAL_ID", "=", serialId.trim())
+            .first();
+        
+        /** Create promise to get home room list of the equipment */
+        const getEquipmentHomeRoomListPromise = db 
+            .select(
+                "room.ROOM_NUMBER AS roomNumber"
+            ) 
+            .from("equipment_home")
+            .leftJoin("room", "room.PK_READER_TAG_ID", "=", "equipment_home.FK_ROOM_READER_TAG_ID")
+            .where("equipment_home.FK_EQUIPMENT_SERIAL_ID", "=", serialId.trim())
+            .orderBy("roomNumber", "asc");
 
-        /** If there is no tool, return null */
-        if(!equipment) {
+        /** Concurrently perform retrieving equipment information and equipment home room list */
+        const [equipmentInformation, equipmentHomeRoomList] = await Promise.all([getEquipmentInformationPromise, getEquipmentHomeRoomListPromise]);
+
+        /** If equipment information is not exist, return null */
+        if(!equipmentInformation) {
             return null;
         }
 
-        /** The object user */
-        const responseObject = {
-            serialId: equipment.PK_EQUIPMENT_SERIAL_ID,
-            typeId: equipment.FK_TYPE_ID,
-            modelId: equipment.FK_MODEL_ID,
-            currentRoom: equipment.FK_CURRENT_ROOM_READER_ID,
-            tagId: equipment.TAG_ID,
-            maintenanceStatus: equipment.MAINTENANCE_STATUS,
-            reservationStatus: equipment.RESERVATION_STATUS,
-            usageCondition: equipment.USAGE_CONDITION,
-            purchaseCost: equipment.PURCHASE_COST,
-            purchaseDate: equipment.PURCHASE_DATE
-        }
+        /** Format the return date for purchase date */
+        const formattedDate = equipmentInformation.purchaseDate === null ? "--/--/----" : 
+            new Date(equipmentInformation.purchaseDate)
+                .toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
 
-        /** Return the response object */
+        /** Construct response object represent equipment entity */
+        const responseObject = {
+            modelPhoto: equipmentInformation.modelPhoto,
+            typeId: equipmentInformation.typeId,
+            typeName: equipmentInformation.typeName,
+            modelId: equipmentInformation.modelId,
+            modelName: equipmentInformation.modelName,
+            serialId: equipmentInformation.serialId,
+            maintenanceStatus: equipmentInformation.maintenanceStatus,
+            reservationStatus: equipmentInformation.reservationStatus,
+            usageCondition: equipmentInformation.usageCondition,
+            purchaseCost: equipmentInformation.purchaseCost === null ? "$--.--" : `${equipmentInformation.purchaseCost}`,
+            purchaseDate: formattedDate, 
+            rfidTag: equipmentInformation.rfidTag === null ? "---" : `${equipmentInformation.rfidTag}`,
+            currentRoom: equipmentInformation.currentRoom === null ? "Not found" : `${equipmentInformation.currentRoom}`,
+            homeRooms: equipmentHomeRoomList.length === 0 ? [] : equipmentHomeRoomList.map(room => room.roomNumber)
+        };
+
+        /** Return response object */
         return responseObject;
     } catch(error) {
         /** Logging error, easy to debug */
@@ -47,7 +83,6 @@ async function GetEquipmentBySerialId(db, serialId) {
         /** Return error message string */
         return "There is an error occur."
     }
-    
 }
 
 /** Exports the functions */

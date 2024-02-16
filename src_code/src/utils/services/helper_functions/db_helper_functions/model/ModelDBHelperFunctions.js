@@ -31,6 +31,7 @@ async function GetModelInfoByModelId(db, modelId) {
             modelName: model.MODEL_NAME,
             modelPhotoId: model.MODEL_PHOTO_ID,
             modelPhoto: model.MODEL_PHOTO_URL,
+            typeId: model.FK_TYPE_ID,
             typeName: type.TYPE_NAME
         }
 

@@ -90,7 +90,6 @@ async function GetUserInfoBySchoolId(db, schoolId) {
         /** Return error message string */
         return "There is an error occur."
     }
-    
 }
 
 module.exports ={

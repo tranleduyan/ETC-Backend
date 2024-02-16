@@ -1,8 +1,11 @@
-const signInService = require('../services/Authentication/SignIn');
-const signUpService = require('../services/Authentication/SignUp');
-const sendVerificationCodeService = require("../services/Authentication/SendVerificationCode");
+/** Initialize neccessary modules */
+const SignInService = require('../services/Authentication/SignIn');
+const SignUpService = require('../services/Authentication/SignUp');
+const SendVerificationCodeService = require("../services/Authentication/SendVerificationCode");
+
+/** Exports the module */
 module.exports = {
-    SignIn: signInService.SignIn,
-    SignUp: signUpService.SignUp,
-    SendVerificationCode: sendVerificationCodeService.SendVerificationCode,
+    SignIn: SignInService.SignIn,
+    SignUp: SignUpService.SignUp,
+    SendVerificationCode: SendVerificationCodeService.SendVerificationCode,
 }
