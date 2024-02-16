@@ -1,6 +1,7 @@
 const responseBuilder = require("../../../utils/interfaces/IResponseBuilder");
 const db = require("../../../configurations/database/DatabaseConfigurations");
 const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
+const gHelper = require("../../../utils/interfaces/IHelperFunctions");
 
 /**
  * Handle updating an equipment in the database.
