@@ -41,12 +41,14 @@ async function AntennaScan(res, req) {
         /** Scan info validated successfully, procceed to communicate with database */
         /** If validation pass, we need to destructure variables (see above) from the request body for use. */
         console.log(req);
-        // req undefined
         console.log("Req printed");
-        const { scanData, scanTime } = req.body;
+
+        // error when using req.body
+        const { scanData, scanTime } = req;
 
 
         console.log("Const created successfully");
+
         /** Prepare model's information/data for insert into model table */
         /**TODO create log history database */
 
@@ -56,9 +58,8 @@ async function AntennaScan(res, req) {
 
         };
 
-        
-
         console.log("Created insertData");
+        console.log(insertData);
 
         /** Add new log to scan log database */
         await db("scan_history").insert(insertData);
