@@ -42,7 +42,10 @@ async function AntennaScan(res, req) {
 
         /** Scan info validated successfully, procceed to communicate with database */
         /** If validation pass, we need to destructure variables (see above) from the request body for use. */
-        const { scanData, scanTime } = req.body;
+        console.log(req);
+        // req undefined
+        console.log("Req printed");
+        const { scanData, scanTime } = req;
 
 
         console.log("Const created successfully");

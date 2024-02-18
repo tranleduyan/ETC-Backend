@@ -498,10 +498,12 @@ router.get("/available-models", async(request, response) => {
 router.post("/scan", async(request, response) => {
     try{
         /** Retrieve values from query parameters */
-        const startDate = request.query.startDate;
-        const endDate = request.query.endDate;
+        const scanData = request.body.scanData;
+        const scanTime = request.body.scanTime;
+
+        console.log("scandata: " + scanData);
         /** Perform add scan */
-        return await Promise.resolve(inventoryServices.AntennaScan(response, startDate, endDate));
+        return await Promise.resolve(inventoryServices.AntennaScan(response, request.body));
 
     } catch (error) {
          /** log unexpected error for debugging */
