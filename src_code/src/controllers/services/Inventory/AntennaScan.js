@@ -26,8 +26,6 @@ const streamifier = require("streamifier");
  * Else return a server error of status code 503 (see ResponsiveBuilder.js) - the error are trying to input invalid format to database or any thing else that cannot be seen forward
  */
 async function AntennaScan(res, req) {
-    /** Initialize imageInfo object in order to get uploaded image's information to delete if upload to storage successfully and failed to insert to database */
-    let imageInfo = null;
 
     try{
         /** Validate before communicate with database */
@@ -38,24 +36,27 @@ async function AntennaScan(res, req) {
         // }
 
 
-        console.log("Scan info validated");
+        // console.log("Scan info validated");
 
         /** Scan info validated successfully, procceed to communicate with database */
         /** If validation pass, we need to destructure variables (see above) from the request body for use. */
         console.log(req);
         // req undefined
         console.log("Req printed");
-        const { scanData, scanTime } = req;
+        const { scanData, scanTime } = req.body;
 
 
         console.log("Const created successfully");
         /** Prepare model's information/data for insert into model table */
         /**TODO create log history database */
+
         const insertData = {
             SCAN_DATA: scanData,
             SCAN_TIME: scanTime,
 
         };
+
+        
 
         console.log("Created insertData");
 

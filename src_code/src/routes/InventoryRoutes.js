@@ -408,6 +408,7 @@ router.put("/models/:modelId", upload.single('image'), async(request, response) 
             /** Return request body is empty */
             return responseBuilder.MissingContent(response, "RB");
         }
+        console.log("Body not empty!")
         /** Retrieve model id of the requested update model */
         const modelId = request.params.modelId;
         /** Perform update model */
@@ -500,8 +501,14 @@ router.post("/scan", async(request, response) => {
         /** Retrieve values from query parameters */
         const scanData = request.body.scanData;
         const scanTime = request.body.scanTime;
-
+         /** If there is no request body, then we return the request body is empty */
+         if(!request.body || Object.keys(request.body).length === 0) {
+            /** Return request body is empty */
+            console.log("Request body empty.");
+            return responseBuilder.MissingContent(response, "RB");
+        } 
         console.log("scandata: " + scanData);
+        
         /** Perform add scan */
         return await Promise.resolve(inventoryServices.AntennaScan(response, request.body));
 
