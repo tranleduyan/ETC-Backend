@@ -1,7 +1,7 @@
 /** Initalize neccessary modules */
 const express = require('express');
 const responseBuilder = require('../utils/interfaces/IResponseBuilder');
-const authenticationServices = require('../controllers/interfaces/IAuthentication')
+const authenticationServices = require('../controllers/interfaces/IAuthentication');
 /** Initialize router for the route */
 const router = express.Router();
 
