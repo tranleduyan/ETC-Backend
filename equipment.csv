@@ -1,0 +1,6 @@
+Serial ID,Type ID,Model ID,Current Room Reader ID,Tag ID,Maintenance Status,Reservation Status,Usage Condition,Purchase Cost,Purchase Date
+1,156,118,null,null,Ready,Available,New,null,null
+2,156,118,null,null,Ready,Available,New,null,null
+23,156,118,null,null,Under Repair,In Use,Used,2.31,Sun Nov 09 2003 00:00:00 GMT-0800 (Pacific Standard Time)
+233,156,118,null,null,Ready,Available,New,null,null
+asd,156,118,null,null,Ready,Available,Used,22.02,Thu Feb 22 2024 00:00:00 GMT-0800 (Pacific Standard Time)

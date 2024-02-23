@@ -2,6 +2,7 @@
 const EquipmentAdditionService = require('../services/Inventory/EquipmentAddition');
 const UpdateEquipmentService = require('../services/Inventory/EquipmentUpdate');
 const EquipmentRemovalService = require('../services/Inventory/EquipmentRemoval');
+const ExportCSVService = require('../services/Inventory/ExportCSV');
 const ModelAdditionService = require('../services/Inventory/ModelAddition');
 const TypeAdditionService = require('../services/Inventory/TypeAddition');
 const GetAllTypesService = require('../services/Inventory/GetAllTypes');
@@ -19,6 +20,7 @@ const GetEquipmentInformationServices = require("../services/Inventory/GetEquipm
 
 /** Exports the module */
 module.exports = {
+    ExportCSV: ExportCSVService.ExportCSV,
     EquipmentAddition: EquipmentAdditionService.EquipmentAddition,
     EquipmentUpdate: UpdateEquipmentService.EquipmentUpdate,
     EquipmentRemoval: EquipmentRemovalService.EquipmentRemoval,

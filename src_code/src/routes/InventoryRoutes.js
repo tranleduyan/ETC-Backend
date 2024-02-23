@@ -12,6 +12,41 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 /**
+ *  EXPORT CSV/EQUIPMENT EXPORT
+ *  URL => /api/inventory/export-csv
+ *  requestBody:
+ *  {
+ *      "schoolId": string
+ *  }
+ * 
+ *  @return 400 (Failed Validation): 
+ *  {
+ *      "message": string
+ *  }
+ *  @return 503 (Server Error):
+ *  {
+ *      "message":  string
+ *  }
+ *  @return 200 (success):
+ *  {
+ *      "message": string
+ *  }
+ */
+router.get('/export-csv', async(request, response) => {
+    try {
+        /** Extract schoolId from request body */
+        const { schoolId } = request.query; 
+        /** Call the ExportCSV function */
+        return await Promise.resolve(inventoryServices.ExportCSV(request,response, schoolId));
+    } catch (error) {
+        /** Logging unexpected error. help for debug */
+        console.log("ERROR: There is an error exporting CSV: ", error);
+        /** Response error message to the client */
+        return responseBuilder.ServerError(response, "There is an error while exporting CSV.");
+    }
+})
+
+/**
  *  POST/ADD EQUIPMENT
  *  URL => /api/inventory/equipment
  *  requestBody:
@@ -251,6 +286,7 @@ router.get('/types', async(request, response) => {
         return responseBuilder.ServerError(response, "There is an error while retrieving types.");
     }
 })
+
 
 /**
  * GET/RETRIEVE ALL MODELS OF A TYPE
