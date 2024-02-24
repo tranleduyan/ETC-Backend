@@ -34,10 +34,8 @@ const upload = multer({ storage: storage });
  */
 router.get('/export-csv', async(request, response) => {
     try {
-        /** Extract schoolId from request body */
-        const { schoolId } = request.query; 
         /** Call the ExportCSV function */
-        return await Promise.resolve(inventoryServices.ExportCSV(request,response, schoolId));
+        return await Promise.resolve(inventoryServices.ExportCSV(request,response));
     } catch (error) {
         /** Logging unexpected error. help for debug */
         console.log("ERROR: There is an error exporting CSV: ", error);
