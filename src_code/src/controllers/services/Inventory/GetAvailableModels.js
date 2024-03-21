@@ -72,15 +72,13 @@ function DatePeriodValidation(startDate, endDate) {
     /** Initialize start date and end date time for validation */
     const startDateTime = new Date(startDate);
     const endDateTime = new Date(endDate);
-    const today = new Date();
+    const today = new Date(0);
     
-    today.setHours(0, 0, 0, 0);
-
     /** Ensure startDate and endDate are valid date forms */
     if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
         return "Start date or end date is invalid.";
     }
-
+    
     /** Ensure startDate is not before today */
     if (startDateTime < today) {
         return "There is no available models in this period of time.";

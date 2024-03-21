@@ -92,9 +92,7 @@ async function ReservationDateValidation(startDate, endDate, schoolId) {
     /** Initialize start date and end date time for validation */
     const startDateTime = new Date(startDate);
     const endDateTime = new Date(endDate);
-    const today = new Date();
-    
-    today.setHours(0, 0, 0, 0);
+    const today = new Date(0);
 
     /** Ensure startDate and endDate are valid date forms */
     if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
