@@ -43,6 +43,7 @@ async function GetAvailableModels(res, startDate, endDate) {
                     modelName: model.modelName,
                     modelPhoto: model.modelPhoto,
                     typeName: model.typeName,
+                    typeId: model.typeId,
                     availableCount: availableCount,
                 };
             }
