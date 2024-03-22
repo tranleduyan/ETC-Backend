@@ -111,7 +111,8 @@ async function ReservationDateValidation(startDate, endDate, schoolId) {
     
     /** Get User role */
     const user = await Promise.resolve(dbHelpers.GetUserInfoBySchoolId(db, schoolId));
-    if(user.userRole !== "Faculty"){
+    
+    if(user.userRole === "Student"){
         /** Ensure that student only can reserve 2 equipment at max */
         try{
             /** Retrieve total quantity of equipment that student reserve */
@@ -279,7 +280,7 @@ async function ReservedEquipmentsValidation(reservedEquipments, startDate, endDa
         }
         
         /** Ensure student user can only reserve maximum 2 equipments */
-        if(user.userRole !== "Faculty") {
+        if(user.userRole === "Student") {
             const totalEquipmentReservedObject =  await db("reserved_equipment").select(db.raw('SUM(QUANTITY) AS totalQuantity'))
                 .whereIn("FK_RESERVATION_ID", function() {
                     this.select("PK_RESERVATION_ID")
