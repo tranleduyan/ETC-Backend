@@ -500,11 +500,12 @@ router.post("/scan", async(request, response) => {
     try{
         /** Retrieve values from query parameters */
         const scanData = request.body.scanData;
-        const scanTime = request.body.scanTime;
+        // const scanTime = request.body.scanTime;
          /** If there is no request body, then we return the request body is empty */
          if(!request.body || Object.keys(request.body).length === 0) {
             /** Return request body is empty */
             console.log("Request body empty.");
+            console.log("scandata: " + scanData);
             return responseBuilder.MissingContent(response, "RB");
         } 
         console.log("scandata: " + scanData);
