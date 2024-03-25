@@ -60,6 +60,7 @@ async function AntennaScan(res, req) {
 
         console.log("Created insertData");
         console.log(insertData);
+        console.log(Date.now());
 
         /** Add new log to scan log database */
         await db("scan_history").insert(insertData);
