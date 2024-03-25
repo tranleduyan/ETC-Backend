@@ -502,6 +502,9 @@ router.post("/scan", async(request, response) => {
         const scanData = request.body.scanData;
         // const scanTime = request.body.scanTime;
          /** If there is no request body, then we return the request body is empty */
+
+        console.log("----------- REQUEST BODY ", request.body);
+
          if(!request.body || Object.keys(request.body).length === 0) {
             /** Return request body is empty */
             console.log("Request body empty.");
