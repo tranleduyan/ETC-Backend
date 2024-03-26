@@ -10,9 +10,10 @@ app.use(cors());
 app.use(express.json());
 
 /** Import routes */
-const authenticationRoutes = require('../src/routes/AuthenticationRoutes');
-const inventoryRoutes = require('../src/routes/InventoryRoutes');
-const reservationRoutes = require('../src/routes/ReservationRoutes');
+const authenticationRoutes = require("../src/routes/AuthenticationRoutes");
+const inventoryRoutes = require("../src/routes/InventoryRoutes");
+const reservationRoutes = require("../src/routes/ReservationRoutes");
+const userRoutes = require("../src/routes/UserRoutes");
 
 /** Define the port */
 const PORT = 5000;
@@ -21,6 +22,7 @@ const PORT = 5000;
 app.use("/api/authentication", authenticationRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/reservation", reservationRoutes);
+app.use("/api/user", userRoutes);
 
 /** Start the server */
 app.listen(PORT, (err) => {
