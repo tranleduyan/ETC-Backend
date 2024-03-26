@@ -72,7 +72,8 @@ async function GetRequestedReservation(response, schoolId) {
           "et.TYPE_NAME AS typeName",
           "ui.FIRST_NAME AS renterFirstName",
           "ui.MIDDLE_NAME AS renterMiddleName",
-          "ui.LAST_NAME AS renterLastName"
+          "ui.LAST_NAME AS renterLastName",
+          "r.FK_SCHOOL_ID AS renterSchoolId"
         )
         .leftJoin(
           "reserved_equipment AS re",
@@ -123,6 +124,7 @@ async function GetRequestedReservation(response, schoolId) {
         modelPhoto,
         typeName,
         itemQuantity,
+        renterSchoolId,
       } = reservation;
       /** Create or update reservation grouping */
       if (!groupedReservations[reservationId]) {
@@ -147,6 +149,7 @@ async function GetRequestedReservation(response, schoolId) {
               endDate,
               status,
               renterName,
+              renterSchoolId,
               totalItems: itemQuantity,
               items: [],
           };
