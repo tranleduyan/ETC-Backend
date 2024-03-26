@@ -69,7 +69,10 @@ async function GetRequestedReservation(response, schoolId) {
           "em.MODEL_NAME AS modelName",
           "em.PK_MODEL_ID AS modelId",
           "em.MODEL_PHOTO_URL AS modelPhoto",
-          "et.TYPE_NAME AS typeName"
+          "et.TYPE_NAME AS typeName",
+          "ui.FIRST_NAME AS renterFirstName",
+          "ui.MIDDLE_NAME AS renterMiddleName",
+          "ui.LAST_NAME AS renterLastName"
         )
         .leftJoin(
           "reserved_equipment AS re",
@@ -85,6 +88,11 @@ async function GetRequestedReservation(response, schoolId) {
           "equipment_type AS et",
           "re.FK_EQUIPMENT_TYPE_ID",
           "et.PK_TYPE_ID"
+        )
+        .leftJoin(
+          "user_info AS ui",
+          "r.FK_SCHOOL_ID",
+          "ui.SCHOOL_ID"
         )
         .where("r.STATUS", "Requested")
         .orderBy("r.PK_RESERVATION_ID", "ASC")
@@ -107,6 +115,9 @@ async function GetRequestedReservation(response, schoolId) {
         startDate,
         endDate,
         status,
+        renterFirstName,
+        renterLastName,
+        renterMiddleName,
         modelName,
         modelId,
         modelPhoto,
@@ -115,14 +126,31 @@ async function GetRequestedReservation(response, schoolId) {
       } = reservation;
       /** Create or update reservation grouping */
       if (!groupedReservations[reservationId]) {
-        groupedReservations[reservationId] = {
-          reservationId,
-          startDate,
-          endDate,
-          status,
-          totalItems: itemQuantity,
-          items: [],
-        };
+        if(user.userRole === "Student") {
+          groupedReservations[reservationId] = {
+            reservationId,
+            startDate,
+            endDate,
+            status,
+            totalItems: itemQuantity,
+            items: [],
+          };
+        } else {
+          let renterName = `${renterLastName}, ${renterFirstName}`;
+          if (renterMiddleName) {
+              renterName += ` ${renterMiddleName}`;
+          }
+          
+          groupedReservations[reservationId] = {
+              reservationId,
+              startDate,
+              endDate,
+              status,
+              renterName,
+              totalItems: itemQuantity,
+              items: [],
+          };
+        }
       } else {
         groupedReservations[reservationId].totalItems += itemQuantity;
       }
