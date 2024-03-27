@@ -35,7 +35,8 @@ async function GetApprovedReservation(response, schoolId) {
           "em.MODEL_NAME AS modelName",
           "em.PK_MODEL_ID AS modelId",
           "em.MODEL_PHOTO_URL AS modelPhoto",
-          "et.TYPE_NAME AS typeName"
+          "et.TYPE_NAME AS typeName",
+          "r.FK_SCHOOL_ID AS renterSchoolId",
         )
         .leftJoin(
           "reserved_equipment AS re",
@@ -51,6 +52,11 @@ async function GetApprovedReservation(response, schoolId) {
           "equipment_type AS et",
           "re.FK_EQUIPMENT_TYPE_ID",
           "et.PK_TYPE_ID"
+        )
+        .leftJoin(
+          "user_info AS ui",
+          "r.FK_SCHOOL_ID",
+          "ui.SCHOOL_ID"
         )
         .where("r.STATUS", "Approved")
         .andWhere("r.FK_SCHOOL_ID", schoolId)
@@ -134,6 +140,7 @@ async function GetApprovedReservation(response, schoolId) {
             startDate,
             endDate,
             status,
+            renterSchoolId,
             totalItems: itemQuantity,
             items: [],
           };
