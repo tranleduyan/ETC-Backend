@@ -60,5 +60,35 @@ router.get("/:schoolId/requested-reservation", async (request, response) => {
   }
 });
 
+/**
+ * PUT/UPDATE STATUS OF RESERVATION TO APPROVE OR DELETE THEM
+ * URL => /api/user/{schoolId}/action?type=[approve | reject | cancel]&id=[reservationId]
+ */
+router.put("/:schoolId/action", async (request, response) => {
+  try {
+    const type = request.query.type;
+    const userId = request.params.schoolId;
+    const reservationId = request.query.id;
+    return await Promise.resolve(
+      userServices.ApproveRejectCancelReservation(
+        response,
+        type,
+        userId,
+        reservationId
+      )
+    );
+  } catch (error) {
+    /** Log error and return 503 */
+    console.log(
+      "ERROR: There is an error while updating the reservation's status:",
+      error
+    );
+    return responseBuilder.ServerError(
+      response,
+      "There is an error while updating the reservation's status."
+    );
+  }
+});
+
 /** Exports the router */
 module.exports = router;
