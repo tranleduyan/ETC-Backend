@@ -21,24 +21,24 @@ async function GetEquipmentBySerialId(db, serialId) {
                 "equipment.PURCHASE_COST AS purchaseCost",
                 "equipment.PURCHASE_DATE AS purchaseDate",
                 "equipment.TAG_ID AS rfidTag",
-                "room.ROOM_NUMBER AS currentRoom"
+                "reader_location.FK_LOCATION_ID AS currentRoom"
             )
             .from("equipment_model")
             .leftJoin("equipment_type", "equipment_type.PK_TYPE_ID", "=", "equipment_model.FK_TYPE_ID")
             .leftJoin("equipment", "equipment.FK_MODEL_ID", "=", "equipment_model.PK_MODEL_ID")
-            .leftJoin("room", "equipment.FK_CURRENT_ROOM_READER_ID", "=", "room.PK_READER_TAG_ID")
+            .leftJoin("reader_location", "equipment.FK_CURRENT_ROOM_READER_ID", "=", "reader_location.PK_READER_TAG_ID")
             .where("equipment.PK_EQUIPMENT_SERIAL_ID", "=", serialId.trim())
             .first();
         
         /** Create promise to get home room list of the equipment */
         const getEquipmentHomeRoomListPromise = db 
             .select(
-                "room.ROOM_NUMBER AS roomNumber"
+                "reader_location.FK_LOCATION_ID AS location"
             ) 
             .from("equipment_home")
-            .leftJoin("room", "room.PK_READER_TAG_ID", "=", "equipment_home.FK_ROOM_READER_TAG_ID")
+            .leftJoin("reader_location", "reader_location.PK_READER_TAG_ID", "=", "equipment_home.FK_ROOM_READER_TAG_ID")
             .where("equipment_home.FK_EQUIPMENT_SERIAL_ID", "=", serialId.trim())
-            .orderBy("roomNumber", "asc");
+            .orderBy("location", "asc");
 
         /** Concurrently perform retrieving equipment information and equipment home room list */
         const [equipmentInformation, equipmentHomeRoomList] = await Promise.all([getEquipmentInformationPromise, getEquipmentHomeRoomListPromise]);
