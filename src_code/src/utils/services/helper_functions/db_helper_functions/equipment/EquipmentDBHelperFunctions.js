@@ -85,7 +85,21 @@ async function GetEquipmentBySerialId(db, serialId) {
     }
 }
 
+/**
+ * Adds new scan data to scan log table
+ *
+ * @param {object} db - The database connection or query builder.
+ * @param {number} scanData - Scan data of card read by the antenna.
+ * @param {number} scanTime - The time that the scan was logged. 
+ * @returns {object|null|string} - If the type is found, returns an object containing type information;
+ *                                 if not found, returns null; if an error occurs, returns an error message string.
+ */
+async function AddScanToDatabase(db, scanData) {
+
+}
+
 /** Exports the functions */
 module.exports = {
-    GetEquipmentBySerialId: GetEquipmentBySerialId
+    GetEquipmentBySerialId: GetEquipmentBySerialId,
+    AddScanToDatabase: AddScanToDatabase
 }

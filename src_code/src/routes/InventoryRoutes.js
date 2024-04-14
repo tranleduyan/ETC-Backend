@@ -603,5 +603,49 @@ router.get("/equipment", async (_, response) => {
     }
 })
 
+/**
+ * POST/SCAN LOG ADDITION
+ * URL => /api/inventory/scans
+ * requestBody:
+ * {
+ *      "scanData": string,
+ *      "scanTime": time
+ * }
+ * 
+ * @return 400 (If failed validation)
+ *         503 (If server error) 
+ *         200 (Success OK)
+ */
+
+router.post("/scan", async(request, response) => {
+    try{
+        /** Retrieve values from query parameters */
+        const scanData = request.body.scanData;
+        // const scanTime = request.body.scanTime;
+         /** If there is no request body, then we return the request body is empty */
+
+        console.log("----------- REQUEST BODY ", request.body);
+
+         if(!request.body || Object.keys(request.body).length === 0) {
+            /** Return request body is empty */
+            // Uncomment for development
+            // console.log("Request body empty.");
+            // console.log("scandata: " + scanData);
+            return responseBuilder.MissingContent(response, "RB");
+        } 
+        // Uncomment for development
+        // console.log("scandata: " + scanData);
+
+        /** Perform add scan */
+        return await Promise.resolve(inventoryServices.AntennaScan(response, request.body));
+
+    } catch (error) {
+         /** log unexpected error for debugging */
+         console.log("ERROR: There is an error while logging new scan:", error);
+         /** Response error message to the client */
+         return responseBuilder.ServerError(response, "There is an error while logging a new scan.");
+    }
+})
+
 /** Exports the router */
 module.exports = router;
