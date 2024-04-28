@@ -26,46 +26,17 @@ const streamifier = require("streamifier");
  * Else return a server error of status code 503 (see ResponsiveBuilder.js) - the error are trying to input invalid format to database or any thing else that cannot be seen forward
  */
 async function AntennaScan(res, req) {
-
     try{
-        /** Validate before communicate with database */
-        // const error = await Promise.resolve(NewScanValidation(res, req));
+        const { scanData } = req;
 
-        // if(error) {
-        //     return error;
-        // }
+        /** Attempt to add scan to database! */
+        const addedScan = await Promise.resolve(dbHelper.AddScanToDatabase(db, scanData));
 
+        if(typeof addedScan === "string"){
+            return responseBuilder.ServerError(res, addedScan);
+        }
 
-        // console.log("Scan info validated");
-
-        /** Scan info validated successfully, procceed to communicate with database */
-        /** If validation pass, we need to destructure variables (see above) from the request body for use. */
-        console.log(req);
-        console.log("Req printed");
-
-        // error when using req.body
-        const { scanData, scanTime } = req;
-
-
-        console.log("Const created successfully");
-
-        /** Prepare model's information/data for insert into model table */
-        /**TODO create log history database */
-
-        const insertData = {
-            SCAN_DATA: scanData,
-            SCAN_TIME: scanTime,
-
-        };
-
-        console.log("Created insertData");
-        console.log(insertData);
-        console.log(Date.now());
-
-        /** Add new log to scan log database */
-        await db("scan_history").insert(insertData);
-
-        /** If create successfully, then return create successful message with entity 'Model' */
+        // copy paste
         return responseBuilder.CreateSuccessful(res, null, "Model");
     } catch(error) {
 
