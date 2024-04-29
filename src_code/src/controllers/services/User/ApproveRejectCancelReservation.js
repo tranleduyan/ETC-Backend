@@ -10,7 +10,7 @@ async function ApproveReservation(res, userId, reservationId) {
     );
 
     const updateData = {
-      STATUS: "Approved", // Corrected typo: "Approved" instead of "Approve"
+      STATUS: "Approved", 
       RESPONDER: `${user.lastName}, ${user.firstName}${
         user.middleName ? ` ${user.middleName}` : ""
       }`,
@@ -22,21 +22,44 @@ async function ApproveReservation(res, userId, reservationId) {
     const approveReservationList = await Promise.resolve(
       dbHelpers.GetApprovedReservationList(db, userId)
     );
+    
 
-    if (!approveReservationList) {
-      return responseBuilder.BadRequest(
-        res,
-        "You do not have any approved reservation."
-      );
+    const requestReservationList = await Promise.resolve(dbHelpers.GetRequestedReservationList(db, userId));
+
+    let allReservation = [];
+
+    if (typeof requestReservationList === "string") {
+      return responseBuilder.ServerError(res, requestReservationList);
     }
 
-    if (typeof approveReservationList === "string") {
-      return responseBuilder.ServerError(res, approveReservationList);
+    if(typeof approveReservationList === "string") {
+      return responseBuilder.ServerError(res, requestReservationList);
+    }
+
+    if(approveReservationList && requestReservationList) {
+      if(approveReservationList.length > 0 && requestReservationList.length === 0) {
+        allReservation = approveReservationList;
+      } else if (approveReservationList.length === 0 && requestReservationList.length > 0) {
+        allReservation = requestReservationList;
+      } else {
+        allReservation = [...approveReservationList, ...requestReservationList]
+      }
+    } else if(approveReservationList && approveReservationList.length > 0) {
+      allReservation = approveReservationList;
+    } else if(requestReservationList && requestReservationList.length > 0) {
+      allReservation = requestReservationList;
+    }
+
+    if (allReservation.length === 0) {
+      return responseBuilder.BadRequest(
+        res,
+        "There is no reservation at the moment."
+      );
     }
 
     return responseBuilder.BuildResponse(res, 200, {
       message: "You have approve a reservation",
-      responseObject: approveReservationList,
+      responseObject: allReservation,
     });
   } catch (error) {
     console.log(
@@ -59,24 +82,51 @@ async function CancelRejectReservation(res, type, userId, reservationId) {
 
     await trx.commit();
 
+    const approveReservationList = await Promise.resolve(
+      dbHelpers.GetApprovedReservationList(db, userId)
+    );
+
     const requestReservationList = await Promise.resolve(
       dbHelpers.GetRequestedReservationList(db, userId)
     );
 
-    if (!requestReservationList) {
-      return responseBuilder.BuildResponse(res, 200, {
-        message: "You don't have any requested reservation.",
-      });
-    }
+    let allReservation = [];
 
     if (typeof requestReservationList === "string") {
       await trx.rollback();
       return responseBuilder.ServerError(res, requestReservationList);
     }
 
+    if(typeof approveReservationList === "string") {
+      await trx.rollback();
+      return responseBuilder.ServerError(res, requestReservationList);
+    }
+
+    if(approveReservationList && requestReservationList) {
+      if(approveReservationList.length > 0 && requestReservationList.length === 0) {
+        allReservation = approveReservationList;
+      } else if (approveReservationList.length === 0 && requestReservationList.length > 0) {
+        allReservation = requestReservationList;
+      } else {
+        allReservation = [...approveReservationList, ...requestReservationList]
+      }
+    } else if(approveReservationList && approveReservationList.length > 0) {
+      allReservation = approveReservationList;
+    } else if(requestReservationList && requestReservationList.length > 0) {
+      allReservation = requestReservationList;
+    }
+
+
+    if (allReservation.length === 0) {
+      return responseBuilder.BadRequest(
+        res,
+        "There is no reservation at the moment."
+      );
+    }
+
     return responseBuilder.BuildResponse(res, 200, {
       message: `You have ${type} a reservation successfully.`,
-      responseObject: requestReservationList,
+      responseObject: allReservation,
     });
   } catch (error) {
     await trx.rollback();
