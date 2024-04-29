@@ -58,7 +58,7 @@ async function ApproveReservation(res, userId, reservationId) {
     }
 
     return responseBuilder.BuildResponse(res, 200, {
-      message: "You have approve a reservation",
+      message: "Approve a reservation successfully!",
       responseObject: allReservation,
     });
   } catch (error) {
@@ -125,7 +125,7 @@ async function CancelRejectReservation(res, type, userId, reservationId) {
     }
 
     return responseBuilder.BuildResponse(res, 200, {
-      message: `You have ${type} a reservation successfully.`,
+      message: `${type.charAt(0).toUpperCase() + type.slice(1)} a reservation successfully!`,
       responseObject: allReservation,
     });
   } catch (error) {
