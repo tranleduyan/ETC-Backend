@@ -30,6 +30,7 @@ async function AntennaScan(res, req) {
         /** Attempt to add scan to database! */
         const addedScan = await Promise.resolve(dbHelper.AddScanToDatabase(db, scanData));
 
+        /** need to update, addedScan is now array */
         if(typeof addedScan === "string"){
             return responseBuilder.ServerError(res, addedScan);
         }

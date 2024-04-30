@@ -1,4 +1,5 @@
 const { request } = require("express");
+const dbHelperUser = require("../user/UserDBHelperFunctions");
 
 /**
  * This function is used to retrieve information of a equipment by it's primary key (serial ID).
@@ -97,34 +98,56 @@ async function GetEquipmentBySerialId(db, serialId) {
  *                                 if not found, returns null; if an error occurs, returns an error message string.
  */
 async function AddScanToDatabase(db, scanData) {
-    try {
-
-        /** Finds latest scan entry of particular equipment to determine if it is entering or exiting antenna's room. */
-        const lastScan = await db('scan_history').select(
-            'EQUIPMENT_TAG_ID',
-            'SCAN_TIME',
-            'IS_WALK_IN',
-            'FK_LOCATION_ROOM_READER_ID'
-        )
-        .where('EQUIPMENT_TAG_ID', '=', scanData['EQUIPMENT_TAG_ID'])
-        .orderBy('SCAN_TIME', 'desc')
-        .limit(1);
-
-        console.log("-------- lastScan ", lastScan);
+    try {        
         
-        const isWalkIn = EquipmentLocationHandler(lastScan, scanData);
-        const currentTime =  Date.now();
-        console.log("---- LOCATION HANDLER ", isWalkIn);
+        /** 
+         * assignedPackage is a map with the key represnting the student who is responsible for the scans, and
+         * the values being an array of item IDs. If there is no studentID in the unsorted package, key will be
+         * "EMPTY"
+        */
+        console.log("----- Entered AddScanToDatabase");
+        console.log("scanData: ", scanData);
 
-        console.log("------- SENDING REQUEST")
-        const responseObject = await db('scan_history').insert(
-            {
-                EQUIPMENT_TAG_ID : scanData.EQUIPMENT_TAG_ID,
-                SCAN_TIME : currentTime,
-                IS_WALK_IN : isWalkIn,
-                FK_LOCATION_ROOM_READER_ID : scanData.FK_LOCATION_ROOM_READER_ID,
-                FK_SCHOOL_ID : scanData.FK_SCHOOL_ID
-            });
+        const assignedPackage = await Promise.resolve(AssignPackage(db, scanData));
+        const iterator = assignedPackage.keys();
+
+        const studentId = iterator.next().value;
+        const items = assignedPackage.get(studentId);
+
+        let responseObject = [];
+
+        console.log("---- Entering Tag Gauntlet");
+        /** Add each item tag ID to database with student Id */
+        for (i = 0; i < items.length; ++i) {
+             /** Finds latest scan entry of particular equipment to determine if it is entering or exiting antenna's room. */
+            const lastScan = await db('scan_history').select(
+                'EQUIPMENT_TAG_ID',
+                'SCAN_TIME',
+                'IS_WALK_IN',
+                'FK_LOCATION_ROOM_READER_ID'
+            )
+            .where('EQUIPMENT_TAG_ID', '=', items[i])
+            .orderBy('SCAN_TIME', 'desc')
+            .limit(1);
+
+            console.log("-------- lastScan ", lastScan);
+            
+            const isWalkIn = EquipmentLocationHandler(lastScan, scanData);
+            const currentTime =  Date.now();
+            console.log("---- LOCATION HANDLER ", isWalkIn);
+
+            console.log("------- SENDING REQUEST");
+            responseObject.push(await db('scan_history').insert(
+                {
+                    EQUIPMENT_TAG_ID : items[i],
+                    SCAN_TIME : currentTime,
+                    IS_WALK_IN : isWalkIn,
+                    FK_LOCATION_ROOM_READER_ID : scanData.FK_LOCATION_ROOM_READER_ID,
+                    FK_SCHOOL_ID : studentId
+                }));
+        }
+
+       
         // const  responseObject= await db('scan_history').insert(requestObject);
         return responseObject;
     } catch (error) {
@@ -134,6 +157,45 @@ async function AddScanToDatabase(db, scanData) {
         return "An error occured while trying to add the scan."
     }
 }
+
+/**
+ * Searches through list of sent IDs to identify a student ID. Assigns all items in package
+ * to first student ID identified as Map<String, String[]]>
+ * If no student ID is found, the key is set to value "EMPTY".
+ * @param {object} db - The database connection or query builder.
+ * @param {number} scanData - ID of the scanner that sent the request.   
+ * @returns {object|null|string} - If the type is found, returns an object containing type information;
+ *                                 if not found, returns null; if an error occurs, returns an error message string.
+ */
+async function AssignPackage(db, scanData) {
+    console.log("----- Entered AssignPackage");
+    console.log("scanData: ", scanData);
+    const scanList = scanData.SCANS; 
+
+    let package = new Map();
+    let wrappedKey = "EMPTY";
+    let wrappedValues = [];
+
+    console.log("Starting value loop");
+    for (let i = 0; i < scanList.length; ++i) {
+        const currentTagId = scanList[i];
+        
+        /** If current tag is not a student, add to wrapped values */
+        if(!(await dbHelperUser.CheckUserExistsByTag(db, currentTagId))) {
+            wrappedValues.push(currentTagId);
+        }
+        /** If current TAG_ID belongs to a student, current Id is set to the key*/
+        else {
+            wrappedKey = currentTagId; 
+        }
+    }
+
+    package.set(wrappedKey, wrappedValues);
+    console.log("--- Loop Exited: ", package);
+    return package; 
+}
+
+
 
 /**
  * Updates the location information of the equipment, including which room it is currently in and whether
