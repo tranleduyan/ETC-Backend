@@ -112,9 +112,20 @@ async function AddScanToDatabase(db, scanData) {
 
         console.log("-------- lastScan ", lastScan);
         
-        const requestObject = EquipmentLocationHandler(lastScan, scanData);
+        const isWalkIn = EquipmentLocationHandler(lastScan, scanData);
+        const currentTime =  Date.now();
+        console.log("---- LOCATION HANDLER ", isWalkIn);
 
-        const  responseObject= await db('scan_history').insert(requestObject);
+        console.log("------- SENDING REQUEST")
+        const responseObject = await db('scan_history').insert(
+            {
+                EQUIPMENT_TAG_ID : scanData.EQUIPMENT_TAG_ID,
+                SCAN_TIME : currentTime,
+                IS_WALK_IN : isWalkIn,
+                FK_LOCATION_ROOM_READER_ID : scanData.FK_LOCATION_ROOM_READER_ID,
+                FK_SCHOOL_ID : scanData.FK_SCHOOL_ID
+            });
+        // const  responseObject= await db('scan_history').insert(requestObject);
         return responseObject;
     } catch (error) {
         /** Log the error for debugging */
@@ -132,16 +143,8 @@ async function AddScanToDatabase(db, scanData) {
  * @returns {object|null|string} - If the type is found, returns an object containing type information;
  *                                 if not found, returns null; if an error occurs, returns an error message string.
  */
-async function EquipmentLocationHandler(lastScan, scanData) {
+function EquipmentLocationHandler(lastScan, scanData) {
     console.log("---- ENTERED EQUIPMENT LOCATION HANDLER");
-
-    requestObject = {
-        EQUIPMENT_TAG_ID: scanData.EQUIPMENT_TAG_ID,
-        IS_WALK_IN: true,
-        FK_LOCATION_ROOM_READER_ID: scanData.FK_LOCATION_ROOM_READER_ID,
-        SCAN_TIME: Date.now()
-    }
-
     /** 
      * 
      * Two cases for our scans:
@@ -156,11 +159,9 @@ async function EquipmentLocationHandler(lastScan, scanData) {
      */
     if (lastScan.FK_LOCATION_ROOM_READER_ID == scanData.FK_LOCATION_ROOM_READER_ID
         && lastScan.IS_WALK_IN) {
-        responseObject.IS_WALK_IN = false;
+        return false;
     }
-
-    console.log("----- REQUESTOBJECT ", requestObject);
-    return requestObject;
+    return true;
 }
 
 /** Exports the functions */
