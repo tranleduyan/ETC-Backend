@@ -119,31 +119,31 @@ async function AddScanToDatabase(db, scanData) {
         console.log("---- Entering Tag Gauntlet");
         /** Add each item tag ID to database with student Id */
         for (i = 0; i < items.length; ++i) {
+            console.log("item: ",i, items[i]);
              /** Finds latest scan entry of particular equipment to determine if it is entering or exiting antenna's room. */
             const lastScan = await db('scan_history').select(
-                'EQUIPMENT_TAG_ID',
+                'FK_EQUIPMENT_TAG_ID',
                 'SCAN_TIME',
                 'IS_WALK_IN',
                 'FK_LOCATION_ROOM_READER_ID'
             )
-            .where('EQUIPMENT_TAG_ID', '=', items[i])
+            .where('FK_EQUIPMENT_TAG_ID', '=', items[i])
             .orderBy('SCAN_TIME', 'desc')
             .limit(1);
 
             console.log("-------- lastScan ", lastScan);
             
             const isWalkIn = EquipmentLocationHandler(lastScan, scanData);
-            const currentTime =  Date.now();
+        
             console.log("---- LOCATION HANDLER ", isWalkIn);
 
             console.log("------- SENDING REQUEST");
             responseObject.push(await db('scan_history').insert(
                 {
-                    EQUIPMENT_TAG_ID : items[i],
-                    SCAN_TIME : currentTime,
+                    FK_EQUIPMENT_TAG_ID : items[i],
                     IS_WALK_IN : isWalkIn,
                     FK_LOCATION_ROOM_READER_ID : scanData.FK_LOCATION_ROOM_READER_ID,
-                    FK_SCHOOL_ID : studentId
+                    FK_SCHOOL_TAG_ID : studentId
                 }));
         }
 
