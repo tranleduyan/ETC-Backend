@@ -26,6 +26,7 @@ async function AntennaScan(res, req) {
         console.log("req.body: ", req.body);
         console.log("scanData: ", scanData);
         console.log("---------- EQUIPMENT_TAG_ID: ", scanData.EQUIPMENT_TAG_ID);
+        
         /** Attempt to add scan to database! */
         const addedScan = await Promise.resolve(dbHelper.AddScanToDatabase(db, scanData));
 
