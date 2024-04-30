@@ -2,7 +2,7 @@
 const responseBuilder = require("../../../utils/interfaces/IResponseBuilder");
 const helpers = require("../../../utils/interfaces/IHelperFunctions");
 const db = require("../../../configurations/database/DatabaseConfigurations");
-const dbHelper = require("../../../utils/interfaces/IDBHelperFunctions");
+const dbHelper = require("../../../utils/services/helper_functions/db_helper_functions/equipment/EquipmentDBHelperFunctions");
 const drive = require("../../../configurations/googleapis/GoogleAPIConfiguration");
 const streamifier = require("streamifier");
 
@@ -15,20 +15,17 @@ const streamifier = require("streamifier");
  * @returns {object} - This response object indicates the result of the model addition attempt.
  * 
  * Expected Form Data: 
- * req.file (Maximum 1 file ends with .jpg, .png, .heic, .hevc, .heif)
- * req.body: 
- * {
- *      "modelName": string,
- *      "typeId": int
- * }
  * 
  * Response is the message with status code 200 if successfully
  * Else return a server error of status code 503 (see ResponsiveBuilder.js) - the error are trying to input invalid format to database or any thing else that cannot be seen forward
  */
 async function AntennaScan(res, req) {
     try{
-        const { scanData } = req;
-
+        const scanData = req.body;
+        console.log("--------- Entered AntennaScan");
+        console.log("req.body: ", req.body);
+        console.log("scanData: ", scanData);
+        console.log("---------- EQUIPMENT_TAG_ID: ", scanData.EQUIPMENT_TAG_ID);
         /** Attempt to add scan to database! */
         const addedScan = await Promise.resolve(dbHelper.AddScanToDatabase(db, scanData));
 
@@ -37,7 +34,7 @@ async function AntennaScan(res, req) {
         }
 
         // copy paste
-        return responseBuilder.CreateSuccessful(res, null, "Model");
+        return responseBuilder.CreateSuccessful(res, null, "Scan log");
     } catch(error) {
 
         console.log("ERROR: An error occurred while adding the scan information: ", error);

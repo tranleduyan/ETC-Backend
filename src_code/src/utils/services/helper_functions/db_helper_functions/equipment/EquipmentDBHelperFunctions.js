@@ -1,3 +1,5 @@
+const { request } = require("express");
+
 /**
  * This function is used to retrieve information of a equipment by it's primary key (serial ID).
  * @param {object} db - the knex object configurations, allow us to open connection and communicate with mysql. 
@@ -104,10 +106,12 @@ async function AddScanToDatabase(db, scanData) {
             'IS_WALK_IN',
             'FK_LOCATION_ROOM_READER_ID'
         )
-        .where('EQUIPMENT_TAG_ID', '=', scanData)
-        .orderby('SCAN_TIME', 'DESC')
+        .where('EQUIPMENT_TAG_ID', '=', scanData['EQUIPMENT_TAG_ID'])
+        .orderBy('SCAN_TIME', 'desc')
         .limit(1);
 
+        console.log("-------- lastScan ", lastScan);
+        
         const requestObject = EquipmentLocationHandler(lastScan, scanData);
 
         const  responseObject= await db('scan_history').insert(requestObject);
@@ -129,13 +133,15 @@ async function AddScanToDatabase(db, scanData) {
  *                                 if not found, returns null; if an error occurs, returns an error message string.
  */
 async function EquipmentLocationHandler(lastScan, scanData) {
-    responseObject = {
+    console.log("---- ENTERED EQUIPMENT LOCATION HANDLER");
+
+    requestObject = {
         EQUIPMENT_TAG_ID: scanData.EQUIPMENT_TAG_ID,
-        IS_WALK_IN,
+        IS_WALK_IN: true,
         FK_LOCATION_ROOM_READER_ID: scanData.FK_LOCATION_ROOM_READER_ID,
         SCAN_TIME: Date.now()
     }
-    
+
     /** 
      * 
      * Two cases for our scans:
@@ -148,13 +154,13 @@ async function EquipmentLocationHandler(lastScan, scanData) {
      * 2. If the current scan is a different room than last room scan which was a walk in, current scan will
      *      be treated as a walk in for the current room. (Our system failed to pick up a walk out somewhere.)
      */
-    if (lastScan['FK_LOCATION_ROOM_READER_ID'] == scanData['FK_LOCATION_ROOM_READER_ID']
-        && lastScan['IS_WALK_IN']) {
-        responseObject['IS_WALK_IN'] = false;
+    if (lastScan.FK_LOCATION_ROOM_READER_ID == scanData.FK_LOCATION_ROOM_READER_ID
+        && lastScan.IS_WALK_IN) {
+        responseObject.IS_WALK_IN = false;
     }
-    else {
-        responseObject['IS_WALK_IN'] = true;
-    }
+
+    console.log("----- REQUESTOBJECT ", requestObject);
+    return requestObject;
 }
 
 /** Exports the functions */

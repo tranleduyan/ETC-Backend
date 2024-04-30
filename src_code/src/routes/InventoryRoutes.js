@@ -620,7 +620,7 @@ router.get("/equipment", async (_, response) => {
 router.post("/scan", async(request, response) => {
     try{
         /** Retrieve values from query parameters */
-        const scanData = request.body.scanData;
+        const scanData = request.body;
         // const scanTime = request.body.scanTime;
          /** If there is no request body, then we return the request body is empty */
 
@@ -628,16 +628,13 @@ router.post("/scan", async(request, response) => {
 
          if(!request.body || Object.keys(request.body).length === 0) {
             /** Return request body is empty */
-            // Uncomment for development
-            // console.log("Request body empty.");
-            // console.log("scandata: " + scanData);
             return responseBuilder.MissingContent(response, "RB");
         } 
         // Uncomment for development
-        // console.log("scandata: " + scanData);
+        console.log("scandata: " + scanData);
 
         /** Perform add scan */
-        return await Promise.resolve(inventoryServices.AntennaScan(response, request.body));
+        return await Promise.resolve(inventoryServices.AntennaScan(response, request));
 
     } catch (error) {
          /** log unexpected error for debugging */
