@@ -25,8 +25,9 @@ async function GetEquipmentInformation(res, serialId) {
             purchaseCost: equipmentInformation.purchaseCost,
             purchaseDate: equipmentInformation.purchaseDate,
             rfidTag: equipmentInformation.rfidTag,
-            currentRoom: equipmentInformation.currentRoom,
-            homeRooms: equipmentInformation.homeRooms
+            lastSeen: equipmentInformation.lastSeen,
+            homeRooms: equipmentInformation.homeRooms,
+            usageHistory: equipmentInformation.usageHistory
         }
 
         /** Return equipment entity with successful message */

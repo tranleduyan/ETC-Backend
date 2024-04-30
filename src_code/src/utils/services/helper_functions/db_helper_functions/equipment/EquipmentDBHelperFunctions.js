@@ -1,3 +1,5 @@
+const userDBHelperFunctions = require("../user/UserDBHelperFunctions");
+
 /**
  * This function is used to retrieve information of a equipment by it's primary key (serial ID).
  * @param {object} db - the knex object configurations, allow us to open connection and communicate with mysql. 
@@ -21,12 +23,10 @@ async function GetEquipmentBySerialId(db, serialId) {
                 "equipment.PURCHASE_COST AS purchaseCost",
                 "equipment.PURCHASE_DATE AS purchaseDate",
                 "equipment.TAG_ID AS rfidTag",
-                "reader_location.FK_LOCATION_ID AS currentRoom"
             )
             .from("equipment_model")
             .leftJoin("equipment_type", "equipment_type.PK_TYPE_ID", "=", "equipment_model.FK_TYPE_ID")
             .leftJoin("equipment", "equipment.FK_MODEL_ID", "=", "equipment_model.PK_MODEL_ID")
-            .leftJoin("reader_location", "equipment.FK_CURRENT_ROOM_READER_ID", "=", "reader_location.PK_READER_TAG_ID")
             .where("equipment.PK_EQUIPMENT_SERIAL_ID", "=", serialId.trim())
             .first();
         
@@ -47,6 +47,24 @@ async function GetEquipmentBySerialId(db, serialId) {
         if(!equipmentInformation) {
             return null;
         }
+
+        const equipmentLastSeenHistory = await db
+            .select(
+                "location.LOCATION_NAME AS locationName", 
+                "scan_history.SCAN_TIME AS scanTime", 
+                "scan_history.FK_SCHOOL_TAG_ID AS studentTagId",
+                db.raw("CONCAT(user_info.LAST_NAME, ', ', user_info.FIRST_NAME) AS FullName")
+            )
+            .from("scan_history")
+            .leftJoin("reader_location", "reader_location.PK_READER_TAG_ID", "=", "scan_history.FK_LOCATION_ROOM_READER_ID")
+            .leftJoin("location", "location.PK_LOCATION_ID", "=", "reader_location.FK_LOCATION_ID")
+            .leftJoin("user_info", "user_info.TAG_ID", "=", "scan_history.FK_SCHOOL_TAG_ID")
+            .where("scan_history.FK_EQUIPMENT_TAG_ID", "=", equipmentInformation.rfidTag)
+            .orderBy("scan_history.SCAN_TIME", "DESC");
+
+        const equipmentLastSeen = equipmentLastSeenHistory?.length === 0 ? null : equipmentLastSeenHistory[0].locationName;
+
+        const equipmentUsageHistoryList = equipmentLastSeenHistory.filter(history => history.studentTagId !== null);
 
         /** Format the return date for purchase date */
         const formattedDate = equipmentInformation.purchaseDate === null ? "--/--/----" : 
@@ -71,8 +89,9 @@ async function GetEquipmentBySerialId(db, serialId) {
             purchaseCost: equipmentInformation.purchaseCost === null ? "$--.--" : `${equipmentInformation.purchaseCost}`,
             purchaseDate: formattedDate, 
             rfidTag: equipmentInformation.rfidTag === null ? "---" : `${equipmentInformation.rfidTag}`,
-            currentRoom: equipmentInformation.currentRoom === null ? "Not found" : `${equipmentInformation.currentRoom}`,
-            homeRooms: equipmentHomeRoomList.length === 0 ? [] : equipmentHomeRoomList.map(room => room.roomNumber)
+            lastSeen: equipmentLastSeen === null ? "Not found" : equipmentLastSeen,
+            homeRooms: equipmentHomeRoomList.length === 0 ? [] : equipmentHomeRoomList.map(room => room.roomNumber),
+            usageHistory: equipmentUsageHistoryList.length === 0 ? [] : equipmentUsageHistoryList
         };
 
         /** Return response object */
