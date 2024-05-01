@@ -92,7 +92,46 @@ async function GetUserInfoBySchoolId(db, schoolId) {
     }
 }
 
+/**
+ * This function is used to retrieved information of an user by their school id.
+ * @param {object} db - the knex object configurations, allow us to open connection and communicate with mysql. 
+ * @param {string} schoolId - the school id of the user we want to retrieve the information.
+ * @returns {object} responseObject - the user object include user's information.
+ */
+async function CheckUserExistsByTag(db, tagId) {
+    try{
+        /** Logs for development */
+        // console.log("---- ENTERED CheckUserExistsByTag");
+        // console.log("tagId: ", tagId);
+
+        /** Try to return row with matching Tag_ID */
+        const match = await db.select(1)
+        .from("user_info")
+        .where("TAG_ID", "=", tagId);
+
+        /** Logs for development */
+       // console.log("match: ", match);
+
+        /** If there is no user, return null */
+        if(match.length == 0) {
+            /** Logs for development */
+            // console.log("User: ", tagId, " does not exist!");
+            return false;
+        }
+        /** Logs for development */
+        // console.log("User: ", tagId, " does exist!");
+        return true;
+    } catch(error) {
+        /** Logging error, easy to debug */
+        console.log("ERROR: There is an error while confirming an existing user from a tag id: ", error); 
+        
+        /** Return error message string */
+        return "An error occurred confirming an existing user from on a tag id."
+    }
+}
+
 module.exports ={
     GetUserInfoByEmailAddress,
-    GetUserInfoBySchoolId
+    GetUserInfoBySchoolId,
+    CheckUserExistsByTag
 }
