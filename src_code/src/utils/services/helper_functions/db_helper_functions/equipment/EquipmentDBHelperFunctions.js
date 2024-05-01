@@ -113,6 +113,7 @@ async function AddScanToDatabase(db, scanData) {
 
         const studentId = iterator.next().value;
         const items = assignedPackage.get(studentId);
+        console.log("STUDENT ID --------", studentId);
 
         let responseObject = [];
 
@@ -138,13 +139,28 @@ async function AddScanToDatabase(db, scanData) {
             console.log("---- LOCATION HANDLER ", isWalkIn);
 
             console.log("------- SENDING REQUEST");
-            responseObject.push(await db('scan_history').insert(
-                {
-                    FK_EQUIPMENT_TAG_ID : items[i],
-                    IS_WALK_IN : isWalkIn,
-                    FK_LOCATION_ROOM_READER_ID : scanData.FK_LOCATION_ROOM_READER_ID,
-                    FK_SCHOOL_TAG_ID : studentId
-                }));
+
+            //** If no student ID is in the package, do not call with student ID */
+            if (studentID == "EMPTY") {
+                responseObject.push(await db('scan_history').insert(
+                    {
+                        FK_EQUIPMENT_TAG_ID : items[i],
+                        IS_WALK_IN : isWalkIn,
+                        FK_LOCATION_ROOM_READER_ID : scanData.FK_LOCATION_ROOM_READER_ID
+                    }));
+            }
+            
+            else {
+                responseObject.push(await db('scan_history').insert(
+                    {
+                        FK_EQUIPMENT_TAG_ID : items[i],
+                        IS_WALK_IN : isWalkIn,
+                        FK_LOCATION_ROOM_READER_ID : scanData.FK_LOCATION_ROOM_READER_ID,
+                        FK_SCHOOL_TAG_ID : studentId
+                    }));
+
+            }
+          
         }
 
        
