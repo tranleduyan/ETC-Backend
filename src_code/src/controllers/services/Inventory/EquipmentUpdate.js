@@ -20,7 +20,8 @@ const gHelper = require("../../../utils/interfaces/IHelperFunctions");
  *      "reservationStatus": "Available" OR "In Use" (optional),
  *      "usageCondition": "Used" OR "New" (optional),
  *      "purchaseCost": 1102.23 (optional),
- *      "purchaseDate": "2016-12-08" (optional)
+ *      "purchaseDate": "2016-12-08" (optional),
+ *      "rfidTag": "0001" (optional)
  *  }
  * 
  * Response is the message with status code 200 if successfully
@@ -35,7 +36,7 @@ async function EquipmentUpdate(res, req, serialId) {
         }
 
         /** Destructure variables from request body */
-        const { typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+        const { typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, rfidTag } = req;
         let equipmentInfo = {};
         
         /** Checking if optional variables exist (and if so, add to update request) */
@@ -67,6 +68,10 @@ async function EquipmentUpdate(res, req, serialId) {
             equipmentInfo["PURCHASE_DATE"] = purchaseDate;
         }
 
+        if(rfidTag) {
+            equipmentInfo["TAG_ID"] = rfidTag;
+        }
+
         /** Update the equipment */
         await db("equipment")
             .update(equipmentInfo)  
@@ -90,7 +95,7 @@ async function EquipmentUpdate(res, req, serialId) {
 async function EquipmentUpdateValidation(res, req, serialId) {
     try{
         /** Destructure variables from the request body */
-        const { schoolId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+        const { schoolId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, rfidTag } = req;
         
         /** We check for all required variables */
         if(!schoolId) {
@@ -134,6 +139,13 @@ async function EquipmentUpdateValidation(res, req, serialId) {
             }
         }
         
+        if(rfidTag) {
+            const existRfidTag = await db("equipment").select("PK_EQUIPMENT_SERIAL_ID").where("TAG_ID", "=", rfidTag.toLowerCase()).first();
+            if(existRfidTag && existRfidTag.PK_EQUIPMENT_SERIAL_ID.toLowerCase() !== serialId?.trim().toLowerCase()) {
+                return responseBuilder.BadRequest(res, "This RFID Tag is already in used.")
+            }
+        }
+
         /** If all checks pass, return null to indicate validation success */
         return null;
     } catch(error){
