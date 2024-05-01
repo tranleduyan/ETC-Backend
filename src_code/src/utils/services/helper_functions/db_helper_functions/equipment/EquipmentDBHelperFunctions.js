@@ -160,7 +160,7 @@ async function AddScanToDatabase(db, scanData) {
             console.log("------- SENDING REQUEST");
 
             //** If no student ID is in the package, do not call with student ID */
-            if (studentID == "EMPTY") {
+            if (studentId == "EMPTY") {
                 responseObject.push(await db('scan_history').insert(
                     {
                         FK_EQUIPMENT_TAG_ID : items[i],
