@@ -8,7 +8,7 @@
 async function GetAllLocations(db) {
   try {
     /** Retrieve all locations */
-    const allLocations = db("location").select("PK_LOCATION_ID AS locationId, LOCATION_NAME AS locationName");
+    const allLocations = db("location").select("PK_LOCATION_ID AS locationId", "LOCATION_NAME AS locationName");
     
     /** If there is no location */
     if(allLocations && allLocations.length === 0) {

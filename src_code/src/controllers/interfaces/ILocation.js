@@ -1,9 +1,9 @@
 /** Import neccessary modules */
-const addLocationService = require("../services/Location/AddLocation");
-const getAllLocationService = require("../services/Location/GetAllLocations");
+const AddLocationService = require("../services/Location/AddLocation");
+const GetAllLocationService = require("../services/Location/GetAllLocations");
 
 /** Export the module */
 module.exports = {
-  AddLocation: addLocationService.AddLocation,
-  GetAllLocations: getAllLocationService.GetAllLocations
+  AddLocation: AddLocationService.AddLocation,
+  GetAllLocations: GetAllLocationService.GetAllLocations
 }

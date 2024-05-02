@@ -620,7 +620,6 @@ router.get("/equipment", async (_, response) => {
 router.post("/scan", async(request, response) => {
     try{
          /** If there is no request body, then we return the request body is empty */
-
          if(!request.body || Object.keys(request.body).length === 0) {
             /** Return request body is empty */
             return responseBuilder.MissingContent(response, "RB");
@@ -636,6 +635,21 @@ router.post("/scan", async(request, response) => {
          console.log("ERROR: There is an error while logging new scan:", error);
          /** Response error message to the client */
          return responseBuilder.ServerError(response, "There is an error while logging a new scan.");
+    }
+})
+
+router.post("/antenna/create", async(request, response) => {
+    try{
+        /** If there is no request body, then we return the request body is empty */
+        if(!request.body || Object.keys(request.body).length === 0) {
+            /** Return request body is empty */
+            return responseBuilder.MissingContent(response, "RB");
+        } 
+
+        return await Promise.resolve(inventoryServices.AddRFIDAntenna(response, request.body));
+    } catch(error) {
+        console.log(`ERROR: There is an error while adding ${request?.body?.antennaId} into antennas:`, error);
+        return responseBuilder.ServerError(res, "There is an error while adding this RFID antenna.");
     }
 })
 
