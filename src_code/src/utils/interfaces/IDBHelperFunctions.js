@@ -22,5 +22,6 @@ module.exports = {
     reservationDBHelperFunctions.GetApprovedReservationList,
   GetRequestedReservationList:
     reservationDBHelperFunctions.GetRequestedReservationList,
-  GetAllLocations: locationDBHelperFunctions.GetAllLocations
+  GetAllLocations: locationDBHelperFunctions.GetAllLocations,
+  GetLocationInformationById: locationDBHelperFunctions.GetLocationInformationById
 };
