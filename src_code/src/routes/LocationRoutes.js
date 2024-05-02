@@ -44,6 +44,14 @@ router.post("/create", async(request, response) => {
 /**
  * GET/RETRIEVING ALL LOCATIONS
  * URL => /api/location/
+ * 
+ * Response Object: 
+ * [
+ *    {
+ *        "locationId": number,
+ *        "locationName": "string"
+ *    }
+ * ] 
  */
 router.get("/", async(_, response) => {
   try{

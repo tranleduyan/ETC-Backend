@@ -12,6 +12,12 @@ const dbHelpers = require("../../../utils/interfaces/IDBHelperFunctions");
  */
 async function AddLocation(res, req) {
   try{
+    /** Validate before processing */
+    const errors = await Promise.resolve(ValidateAddLocation(res, req));
+    if(errors) {
+      return errors;
+    }
+
     /** Extract location name from request body */
     const { locationName } = req;
 
@@ -42,6 +48,46 @@ async function AddLocation(res, req) {
     /** If error, log error and return 503 */
     console.log(`ERROR: There is an error while adding location:`, error);
     return responseBuilder.ServerError(res, "There is an error while adding location.");
+  }
+}
+
+async function ValidateAddLocation(res, req) {
+  try{
+    /** Extract schoolId and locationName from request body */
+    const { schoolId, locationName } = req;
+
+    /** If missing required fields, return Missing Content */
+    if(!schoolId || !locationName) {
+      return responseBuilder.MissingContent(res);
+    }
+
+    /** Get user information */
+    const user = await Promise.resolve(dbHelpers.GetUserInfoBySchoolId(db, schoolId)); 
+
+    /** If user not found, return 404 */
+    if(!user) {
+      return responseBuilder.NotFound(res, "User");
+    }
+
+    /** If user is not admin, return 400 */
+    if(user.userRole === "Student" || user.userRole === "Faculty") {
+      return responseBuilder.BadRequest(res, "Only administrator can perform this action.");
+    }
+
+    /** Get existed location with the location name */
+    const existedLocation = await db("location").select("LOCATION_NAME").where("LOCATION_NAME", "=", locationName.trim()).first();
+
+    /** If there is a location with the requested location name, return 400 because location name must be unique */
+    if(existedLocation) {
+      return responseBuilder.BadRequest(res, "This location is already added. Location name must be unique.");
+    }
+
+    /** Return null, indicating pass validation */
+    return null;
+  } catch(error){
+    /** If error, log error and return 503 */
+    console.log(`ERROR: There is an error while adding ${req?.body?.locationName} into location:`, error);
+    return responseBuilder.ServerError(res, `There is an error while adding ${req?.body?.locationName} into location.`);
   }
 }
 
