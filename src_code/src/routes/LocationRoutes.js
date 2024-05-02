@@ -81,11 +81,38 @@ router.delete("/", async (request, response) => {
     } 
 
     /** Perform action */
-    return await locationServices.LocationRemoval(response, request);
+    return await locationServices.LocationRemoval(response, request.body);
   } catch(error) {
     /** If error, log and return error */
     console.log(`ERROR: There is an error while deleting locations:`, error);
     return responseBuilder.ServerError(response, `There is an error while deleting locations.`);
+  }
+})
+
+/**
+ * PUT/UPDATE LOCATION INFORMATION (NAME)
+ * URL => /api/location/{locationId}
+ * 
+ * Request Body: 
+ * {
+ *    "schoolId": string,
+ *    "newLocationName": string
+ * }
+ */
+route.put("/:locationId", async(request, response) => {
+  try { 
+    /** If there is no request body, then we return the request body is empty */
+    if(!request.body || Object.keys(request.body).length === 0) {
+      /** Return request body is empty */
+      return responseBuilder.MissingContent(response, "RB");
+    } 
+
+    const locationId = request.params.locationId;
+
+    return await locationServices.LocationUpdate(response, request.body, locationId)
+  } catch(error){
+    console.log("ERROR: There is an error while updating location information:", error);
+    return responseBuilder.ServerError(response, "There is an error while updating location information.")
   }
 })
 
