@@ -33,14 +33,12 @@ async function GetEquipmentBySerialId(db, serialId) {
             .first();
         
         /** Create promise to get home room list of the equipment */
-        const getEquipmentHomeRoomListPromise = db 
-            .select(
-                "reader_location.FK_LOCATION_ID AS location"
-            ) 
+        const getEquipmentHomeRoomListPromise = db
+            .select("location.LOCATION_NAME AS locationName")
             .from("equipment_home")
-            .leftJoin("reader_location", "reader_location.PK_READER_TAG_ID", "=", "equipment_home.FK_ROOM_READER_TAG_ID")
+            .leftJoin("location", "location.FK_LOCATION_ID", "=", "equipment_home.FK_LOCATION_ID")
             .where("equipment_home.FK_EQUIPMENT_SERIAL_ID", "=", serialId.trim())
-            .orderBy("location", "asc");
+            .orderBy("locationName", "ASC");
 
         /** Concurrently perform retrieving equipment information and equipment home room list */
         const [equipmentInformation, equipmentHomeRoomList] = await Promise.all([getEquipmentInformationPromise, getEquipmentHomeRoomListPromise]);
