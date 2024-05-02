@@ -36,7 +36,7 @@ async function GetEquipmentBySerialId(db, serialId) {
         const getEquipmentHomeRoomListPromise = db
             .select("location.LOCATION_NAME AS locationName")
             .from("equipment_home")
-            .leftJoin("location", "location.FK_LOCATION_ID", "=", "equipment_home.FK_LOCATION_ID")
+            .leftJoin("location", "location.PK_LOCATION_ID", "=", "equipment_home.FK_LOCATION_ID")
             .where("equipment_home.FK_EQUIPMENT_SERIAL_ID", "=", serialId.trim())
             .orderBy("locationName", "ASC");
 
