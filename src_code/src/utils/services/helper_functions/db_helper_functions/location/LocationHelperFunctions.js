@@ -43,7 +43,7 @@ async function GetLocationInformationById(db, locationId) {
 async function GetAllLocations(db) {
   try {
     /** Retrieve all locations */
-    const allLocations = db("location").select("PK_LOCATION_ID AS locationId");
+    const allLocations = await db("location").select("PK_LOCATION_ID AS locationId");
     
     /** If there is no location */
     if(allLocations && allLocations.length === 0) {
@@ -66,7 +66,7 @@ async function GetAllLocations(db) {
 
     /** If there is location, return the list of locations */
     return locations;
-  } catch(errors) {
+  } catch(error) {
     /** Log and return error */
     console.log(`ERROR: There is an error while retrieving all locations:`, error);
     return "There is an error while retrieving all locations."
