@@ -68,5 +68,26 @@ router.get("/", async(_, response) => {
   }
 })
 
+/**
+ * DELETE/REMOVING LOCATIONS
+ * URL => /api/location/
+ */
+router.delete("/", async (request, response) => {
+  try {
+    /** If there is no request body, then we return the request body is empty */
+    if(!request.body || Object.keys(request.body).length === 0) {
+      /** Return request body is empty */
+      return responseBuilder.MissingContent(response, "RB");
+    } 
+
+    /** Perform action */
+    return await locationServices.LocationRemoval(response, request);
+  } catch(error) {
+    /** If error, log and return error */
+    console.log(`ERROR: There is an error while deleting locations:`, error);
+    return responseBuilder.ServerError(response, `There is an error while deleting locations.`);
+  }
+})
+
 /** Exports the router */
 module.exports = router;
