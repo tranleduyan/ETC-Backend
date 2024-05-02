@@ -4,6 +4,7 @@ const typeDBHelperFunctions = require("../services/helper_functions/db_helper_fu
 const modelDBHelperFunctions = require("../services/helper_functions/db_helper_functions/model/ModelDBHelperFunctions");
 const equipmentDBHelperFunctions = require("../services/helper_functions/db_helper_functions/equipment/EquipmentDBHelperFunctions");
 const reservationDBHelperFunctions = require("../services/helper_functions/db_helper_functions/reservation/ReservationDBHelperFunctions");
+const locationDBHelperFunctions = require("../services/helper_functions/db_helper_functions/location/LocationHelperFunctions")
 
 /** Exports the functions */
 module.exports = {
@@ -21,4 +22,5 @@ module.exports = {
     reservationDBHelperFunctions.GetApprovedReservationList,
   GetRequestedReservationList:
     reservationDBHelperFunctions.GetRequestedReservationList,
+  GetAllLocations: locationDBHelperFunctions.GetAllLocations
 };
