@@ -3,9 +3,15 @@ const responseBuilder = require("../../../utils/interfaces/IResponseBuilder");
 const db = require("../../../configurations/database/DatabaseConfigurations");
 const dbHelpers = require("../../../utils/interfaces/IDBHelperFunctions");
 
+/**
+ * Adds a new location and sends a response.
+ * 
+ * @param {Object} res - The response object.
+ * @param {Object} req - The request object containing the location name.
+ * @returns {Object} - The response object.
+ */
 async function AddLocation(res, req) {
   try{
-
     /** Extract location name from request body */
     const { locationName } = req;
 
@@ -39,6 +45,7 @@ async function AddLocation(res, req) {
   }
 }
 
+/** Exports the module */
 module.exports = {
   AddLocation
 }
