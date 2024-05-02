@@ -49,7 +49,13 @@ router.post("/create", async(request, response) => {
  * [
  *    {
  *        "locationId": number,
- *        "locationName": "string"
+ *        "locationName": "string",
+ *        "locationAntennas": [
+ *            {
+ *                antennaId: number
+ *            }
+ *          ],
+ *        "antennaCount": number
  *    }
  * ] 
  */
