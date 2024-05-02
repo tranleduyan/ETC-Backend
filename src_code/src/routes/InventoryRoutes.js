@@ -667,9 +667,29 @@ router.post("/antenna/create", async(request, response) => {
     } catch(error) {
         /** If error, log error and return 503 */
         console.log(`ERROR: There is an error while adding ${request?.body?.antennaId} into antennas:`, error);
-        return responseBuilder.ServerError(res, "There is an error while adding this RFID antenna.");
+        return responseBuilder.ServerError(response, "There is an error while adding this RFID antenna.");
     }
 })
 
+/** 
+ * GET/RETRIEVING ALL ANTENNAS
+ * URL => /api/inventory/antenna
+ * 
+ * Response Object:
+ * [
+ *      {
+ *          "antennaId": number,
+ *          "locationName": string
+*       }
+ * ]
+ */
+router.get("/antenna", async(_, response) => {
+    try{
+        return await Promise.resolve(inventoryServices.GetAllAntennas(response));
+    } catch(error){
+        console.log(`ERROR: There is an error while retrieving all antennas:`, error);
+        return responseBuilder.ServerError(response, "There is an error while retrieving all antennas.");
+    }
+})
 /** Exports the router */
 module.exports = router;
