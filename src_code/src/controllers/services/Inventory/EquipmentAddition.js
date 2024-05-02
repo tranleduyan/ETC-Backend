@@ -263,7 +263,7 @@ async function SerialIdValidator(res, serialId) {
 
     /** If there is already a equipment with the serial ID, return bad request */
     if(equipmentWithSerialId) { 
-        return responseBuilder.BadRequest(res,"The serial ID is already in use.");
+        return responseBuilder.BadRequest(res,"The Serial ID already exists. Serial ID must be unique.");
     }
 
     /** Indicate pass the validation */

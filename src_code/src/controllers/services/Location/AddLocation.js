@@ -79,7 +79,7 @@ async function ValidateAddLocation(res, req) {
 
     /** If there is a location with the requested location name, return 400 because location name must be unique */
     if(existedLocation) {
-      return responseBuilder.BadRequest(res, "This location is already added. Location name must be unique.");
+      return responseBuilder.BadRequest(res, "This location already exists. Location name must be unique.");
     }
 
     /** Return null, indicating pass validation */

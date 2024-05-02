@@ -119,7 +119,7 @@ async function TypeAdditionValidation(res, req) {
 
         if(existType) {
            return typeof existType === "string" ? 
-           responseBuilder.ServerError(res, existType) : responseBuilder.BadRequest(res, "Type already exist.");
+           responseBuilder.ServerError(res, existType) : responseBuilder.BadRequest(res, "Type already exists.");
         }
         
         /** If all checks pass, return null to indicate validation success */

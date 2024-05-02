@@ -72,7 +72,7 @@ async function ValidateAddRFIDAntenna(res, req) {
     /** If there is antenna with the same requested id, return 400 */
     const existedAntenna = await db("reader_location").select("PK_READER_TAG_ID").where("PK_READER_TAG_ID", "=", antennaId.trim()).first();
     if(existedAntenna) {
-      return responseBuilder.BadRequest(res, "This antenna is already added.")
+      return responseBuilder.BadRequest(res, "This antenna already exists. RFID Antenna ID must be unique.")
     }
     
     /** If invalid location id, return 400 */
