@@ -638,6 +638,22 @@ router.post("/scan", async(request, response) => {
     }
 })
 
+/**
+ * POST/ADD NEW ANTENNA (RFID READER)
+ * URL => /api/inventory/antenna/create
+ * 
+ * Request Body: 
+ * {
+ *      "schoolId": "string",
+ *      "antennaId": "string",
+ *      "locationId": number,
+ * }
+ * 
+ * Response: 
+ * {
+ *      "message": "string"
+ * }
+ */
 router.post("/antenna/create", async(request, response) => {
     try{
         /** If there is no request body, then we return the request body is empty */
@@ -646,8 +662,10 @@ router.post("/antenna/create", async(request, response) => {
             return responseBuilder.MissingContent(response, "RB");
         } 
 
+        /** Perform add RFID antenna */
         return await Promise.resolve(inventoryServices.AddRFIDAntenna(response, request.body));
     } catch(error) {
+        /** If error, log error and return 503 */
         console.log(`ERROR: There is an error while adding ${request?.body?.antennaId} into antennas:`, error);
         return responseBuilder.ServerError(res, "There is an error while adding this RFID antenna.");
     }
