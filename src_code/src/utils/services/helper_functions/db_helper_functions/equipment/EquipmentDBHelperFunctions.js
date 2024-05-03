@@ -205,7 +205,28 @@ async function AddScanToDatabase(db, scanData) {
 
             }
 
+<<<<<<< Updated upstream
         }
+=======
+      
+      }
+      if (isWalkIn) {
+        responseObject.push(
+          await db("equipment").where("TAG_ID", "=", items[i]).update({
+            TAG_ID: items[i],
+            RESERVATION_STATUS: "Available",
+          })
+        );
+      } else {
+        responseObject.push(
+          await db("equipment").where("TAG_ID", "=", items[i]).update({
+            TAG_ID: items[i],
+            RESERVATION_STATUS: "In Use",
+          })
+        );
+      }
+    }
+>>>>>>> Stashed changes
 
 
         // const  responseObject= await db('scan_history').insert(requestObject);
