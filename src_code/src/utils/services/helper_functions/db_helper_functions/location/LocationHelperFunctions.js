@@ -15,7 +15,7 @@ async function GetLocationInformationById(db, locationId) {
         "scan_history.SCAN_TIME AS scanTime", 
         "scan_history.FK_SCHOOL_TAG_ID AS studentTagId",
         "scan_history.PK_SCAN_HISTORY_ID AS scanHistoryId",
-        db.raw("CONCAT(user_info.LAST_NAME, ', ', user_info.FIRST_NAME) AS FullName")
+        db.raw("CONCAT(user_info.LAST_NAME, ', ', user_info.FIRST_NAME) AS fullName")
     )
     .from("scan_history")
     .leftJoin("location", "location.PK_LOCATION_ID", "=", "scan_history.FK_LOCATION_ROOM_READER_ID")
@@ -23,13 +23,39 @@ async function GetLocationInformationById(db, locationId) {
     .where("scan_history.FK_LOCATION_ROOM_READER_ID", "=", locationId)
     .orderBy("scan_history.SCAN_TIME", "DESC");
 
+    const locationEquipmentsPromise = db("equipment_home")
+      .select(
+        "equipment.PK_EQUIPMENT_SERIAL_ID AS serialId",
+        "equipment_type.TYPE_NAME AS typeName",
+        "equipment_model.MODEL_NAME AS modelName",
+        "equipment_model.MODEL_PHOTO_URL AS modelPhoto",
+        "equipment.RESERVATION_STATUS AS reservationStatus"
+      )
+      .leftJoin("equipment", "equipment.PK_EQUIPMENT_SERIAL_ID", "=", "equipment_home.FK_EQUIPMENT_SERIAL_ID")
+      .leftJoin("equipment_type", "equipment_type.PK_TYPE_ID", "=", "equipment.FK_TYPE_ID")
+      .leftJoin("equipment_model", "equipment_model.PK_MODEL_ID", "=", "equipment.FK_MODEL_ID")
+      .where("equipment_home.FK_LOCATION_ID", "=", locationId)
+      .orderBy("typeName")
+      .orderBy("modelName")
+      .orderBy("serialId");
+
     /** Perform promise */
-    const [locationInfo, locationReaders, usageHistory] = await Promise.all([locationInfoPromise, locationReadersPromise, scanHistoryPromise]);
+    const [locationInfo, locationReaders, usageHistory, locationEquipments] = await Promise.all([
+        locationInfoPromise, 
+        locationReadersPromise, 
+        scanHistoryPromise,
+        locationEquipmentsPromise
+      ]);
     
     /** If location not exist, return null */
     if(!locationInfo) {
       return null;
     }
+
+    /** Remove modelName property from each element in locationEquipments */
+    locationEquipments.forEach(equipment => {
+      delete equipment.modelName;
+    }); 
 
     /** Return result */
     return {
@@ -37,7 +63,8 @@ async function GetLocationInformationById(db, locationId) {
       locationName: locationInfo.LOCATION_NAME,
       locationAntennas: locationReaders,
       antennaCount: locationReaders.length,
-      usageHistory: usageHistory
+      usageHistory: usageHistory,
+      locationEquipments: locationEquipments
     }
   } catch(error) {
     /** If error, log and return error */
@@ -79,7 +106,7 @@ async function GetAllLocations(db) {
 
     const sanitizedLocations = locations.map(location => {
       /** Create a copy of the location object excluding unwanted fields */ 
-      const { usageHistory, ...sanitizedLocation } = location;
+      const { usageHistory, locationEquipments, ...sanitizedLocation } = location;
       return sanitizedLocation;
     });
     
@@ -92,6 +119,7 @@ async function GetAllLocations(db) {
   }
 }
 
+/** Exports the module */
 module.exports = {
   GetAllLocations,
   GetLocationInformationById

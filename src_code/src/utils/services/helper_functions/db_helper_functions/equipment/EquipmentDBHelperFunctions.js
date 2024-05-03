@@ -54,7 +54,7 @@ async function GetEquipmentBySerialId(db, serialId) {
                 "scan_history.SCAN_TIME AS scanTime", 
                 "scan_history.FK_SCHOOL_TAG_ID AS studentTagId",
                 "scan_history.PK_SCAN_HISTORY_ID AS scanHistoryId",
-                db.raw("CONCAT(user_info.LAST_NAME, ', ', user_info.FIRST_NAME) AS FullName")
+                db.raw("CONCAT(user_info.LAST_NAME, ', ', user_info.FIRST_NAME) AS fullName")
             )
             .from("scan_history")
             .leftJoin("reader_location", "reader_location.PK_READER_TAG_ID", "=", "scan_history.FK_LOCATION_ROOM_READER_ID")

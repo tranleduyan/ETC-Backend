@@ -99,7 +99,7 @@ router.delete("/", async (request, response) => {
  *    "newLocationName": string
  * }
  */
-route.put("/:locationId", async(request, response) => {
+router.put("/:locationId", async(request, response) => {
   try { 
     /** If there is no request body, then we return the request body is empty */
     if(!request.body || Object.keys(request.body).length === 0) {
@@ -107,12 +107,59 @@ route.put("/:locationId", async(request, response) => {
       return responseBuilder.MissingContent(response, "RB");
     } 
 
+    /** Retrieve locationId */
     const locationId = request.params.locationId;
 
     return await locationServices.LocationUpdate(response, request.body, locationId)
   } catch(error){
+    /** If error, log error and return 503 */
     console.log("ERROR: There is an error while updating location information:", error);
     return responseBuilder.ServerError(response, "There is an error while updating location information.")
+  }
+})
+
+/**
+ * GET/RETRIEVING LOCATION INFORMATION
+ * URL => /api/location/{locationId}
+ * 
+ * Response Object: 
+ * {
+ *    "locationId": number,
+ *    "locationName": string,
+ *    "locationAntennas": [
+ *        {
+ *            "antennaId": string
+ *        }
+ *     ], 
+ *    "antennaCount": number,
+ *    "usageHistory": [
+ *        {
+ *            "scanTime": time,
+ *            "studentTagId": string,
+ *            "scanHistoryId": number,
+ *            "fullName": string 
+ *        }
+ *    ],
+ *    locationEquipments: [
+ *        {
+ *            "serialId": string,
+ *            "typeName": string,
+ *            "modelPhoto": string,
+ *            "reservationStatus": string
+ *        }
+ *    ]
+ * }
+ */
+router.get("/:locationId", async (_, response) => {
+  try {
+    /** Retrieve locationId */
+    const locationId = request.params.locationId;
+
+    return await locationServices.GetLocationInformation(response, locationId);
+  } catch(error) {
+    /** If error, log error and return 503 */
+    console.log("ERROR: There is an error while retrieving location information:", error);
+    return responseBuilder.ServerError(response, "There is an error while retrieving location information.")
   }
 })
 
