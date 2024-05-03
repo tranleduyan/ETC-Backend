@@ -2,7 +2,7 @@
 
 /** Initialize Knex */
 const knex = require("knex");
-require('dotenv').config();
+require("dotenv").config();
 
 const config = {
   client: "mysql",

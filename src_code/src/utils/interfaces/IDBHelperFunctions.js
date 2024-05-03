@@ -4,7 +4,7 @@ const typeDBHelperFunctions = require("../services/helper_functions/db_helper_fu
 const modelDBHelperFunctions = require("../services/helper_functions/db_helper_functions/model/ModelDBHelperFunctions");
 const equipmentDBHelperFunctions = require("../services/helper_functions/db_helper_functions/equipment/EquipmentDBHelperFunctions");
 const reservationDBHelperFunctions = require("../services/helper_functions/db_helper_functions/reservation/ReservationDBHelperFunctions");
-const locationDBHelperFunctions = require("../services/helper_functions/db_helper_functions/location/LocationHelperFunctions")
+const locationDBHelperFunctions = require("../services/helper_functions/db_helper_functions/location/LocationHelperFunctions");
 const antennaDBHelperFunctions = require("../services/helper_functions/db_helper_functions/antenna/AntennaHelperFunctions");
 
 /** Exports the functions */
@@ -24,6 +24,7 @@ module.exports = {
   GetRequestedReservationList:
     reservationDBHelperFunctions.GetRequestedReservationList,
   GetAllLocations: locationDBHelperFunctions.GetAllLocations,
-  GetLocationInformationById: locationDBHelperFunctions.GetLocationInformationById,
-  GetAllAntennas: antennaDBHelperFunctions.GetAllAntennas
+  GetLocationInformationById:
+    locationDBHelperFunctions.GetLocationInformationById,
+  GetAllAntennas: antennaDBHelperFunctions.GetAllAntennas,
 };
