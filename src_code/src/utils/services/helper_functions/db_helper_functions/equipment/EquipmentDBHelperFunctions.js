@@ -89,7 +89,7 @@ async function GetEquipmentBySerialId(db, serialId) {
             purchaseDate: formattedDate, 
             rfidTag: equipmentInformation.rfidTag === null ? "---" : `${equipmentInformation.rfidTag}`,
             lastSeen: equipmentLastSeen === null ? "Not found" : equipmentLastSeen,
-            homeRooms: equipmentHomeRoomList.length === 0 ? [] : equipmentHomeRoomList.map(room => room.roomNumber),
+            homeRooms: equipmentHomeRoomList.length === 0 ? [] : equipmentHomeRoomList.map(room => room.locationName),
             usageHistory: equipmentUsageHistoryList.length === 0 ? [] : equipmentUsageHistoryList
         };
 
