@@ -20,6 +20,7 @@ const GetEquipmentInformationServices = require("../services/Inventory/GetEquipm
 const ScanAdditionService = require("../services/Inventory/AntennaScan");
 const AntennaAdditionService = require("../services/Inventory/AddRFIDAntenna");
 const AntennaRemovalService = require("../services/Inventory/AntennaRemoval");
+const AntennaUpdateService = require("../services/Inventory/AntennaUpdate");
 
 /** Exports the module */
 module.exports = {
@@ -43,5 +44,6 @@ module.exports = {
     GetEquipmentInformation: GetEquipmentInformationServices.GetEquipmentInformation,
     AntennaScan: ScanAdditionService.AntennaScan,
     AddRFIDAntenna: AntennaAdditionService.AddRFIDAntenna,
-    AntennaRemoval: AntennaRemovalService.AntennaRemoval
+    AntennaRemoval: AntennaRemovalService.AntennaRemoval,
+    AntennaUpdate: AntennaUpdateService.AntennaUpdate
 }

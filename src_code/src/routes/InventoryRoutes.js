@@ -719,5 +719,36 @@ router.delete("/antenna", async (request, response) => {
     }
 })
 
+/**
+ * PUT/UPDATE ANTENNA INFORMATION
+ * URL => /api/inventory/antenna/{antennaId}
+ * 
+ * Request Body: 
+ * {
+ *      "schoolId": string, (required)
+ *      "newAntennaId": string, (required) 
+ *      "locationId": number (optional)
+ * }
+ */
+router.put("/antenna/:antennaId", async (request, response) => {
+    try {
+        /** If there is no request body, then we return the request body is empty */
+        if(!request.body || Object.keys(request.body).length === 0) {
+            /** Return request body is empty */
+            return responseBuilder.MissingContent(response, "RB");
+        } 
+
+        /** Retrieve antennaId */
+        const antennaId = request.params.antennaId;
+        
+        /** Perform action */
+        return await Promise.resolve(inventoryServices.AntennaUpdate(response, request.body, antennaId));
+    } catch(error) {
+        /** If error, log error and return 503 */
+        console.log("ERROR: There is an error while updating antenna information:", error);
+        return responseBuilder.ServerError(response, "There is an error while updating antenna information.");
+    }
+})
+
 /** Exports the router */
 module.exports = router;
