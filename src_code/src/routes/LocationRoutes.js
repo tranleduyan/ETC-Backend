@@ -150,7 +150,7 @@ router.put("/:locationId", async(request, response) => {
  *    ]
  * }
  */
-router.get("/:locationId", async (_, response) => {
+router.get("/:locationId", async (request, response) => {
   try {
     /** Retrieve locationId */
     const locationId = request.params.locationId;
