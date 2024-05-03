@@ -174,7 +174,21 @@ async function AddScanToDatabase(db, scanData) {
                         FK_SCHOOL_TAG_ID : studentId
                     }));
 
-                    //** Update status info of item with student in reserved_equipment table */  
+                //** Update status info of item with student in reserved_equipment table */  
+                
+               if (isWalkIn) {
+                responseObject.push(await db('equipment')
+                
+                .where('TAG_ID', '=', items[i])
+                .update(
+                    {
+                        FK_EQUIPMENT_TAG_ID : items[i],
+                        RESERVATION_STATUS : "Available"
+                    }
+                ));
+
+               }
+               else {
                 responseObject.push(await db('equipment')
                 
                 .where('TAG_ID', '=', items[i])
@@ -184,6 +198,11 @@ async function AddScanToDatabase(db, scanData) {
                         RESERVATION_STATUS : "In Use"
                     }
                 ));
+
+               }
+
+
+               
 
             }
 
