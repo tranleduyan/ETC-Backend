@@ -146,10 +146,11 @@ async function AddScanToDatabase(db, scanData) {
             .where('FK_EQUIPMENT_TAG_ID', '=', items[i])
             .orderBy('SCAN_TIME', 'desc')
             .limit(1);
-
-            console.log("-------- lastScan ", lastScan);
-
-            const isWalkIn = EquipmentLocationHandler(lastScan, scanData);
+            
+            //** Turn into JSON */
+            const lastScanData = Object.values(JSON.parse(JSON.stringify(lastScan)));
+            console.log("------- lastScan Data: ", lastScanData);
+            const isWalkIn = EquipmentLocationHandler(lastScanData, scanData);
 
             console.log("---- LOCATION HANDLER ", isWalkIn);
 
@@ -182,7 +183,7 @@ async function AddScanToDatabase(db, scanData) {
                 .where('TAG_ID', '=', items[i])
                 .update(
                     {
-                        FK_EQUIPMENT_TAG_ID : items[i],
+                        TAG_ID : items[i],
                         RESERVATION_STATUS : "Available"
                     }
                 ));
@@ -190,15 +191,13 @@ async function AddScanToDatabase(db, scanData) {
                }
                else {
                 responseObject.push(await db('equipment')
-                
                 .where('TAG_ID', '=', items[i])
                 .update(
                     {
-                        FK_EQUIPMENT_TAG_ID : items[i],
+                        TAG_ID : items[i],
                         RESERVATION_STATUS : "In Use"
                     }
                 ));
-
                }
 
 
@@ -280,10 +279,21 @@ function EquipmentLocationHandler(lastScan, scanData) {
      * 2. If the current scan is a different room than last room scan which was a walk in, current scan will
      *      be treated as a walk in for the current room. (Our system failed to pick up a walk out somewhere.)
      */
-    if (lastScan.FK_LOCATION_ROOM_READER_ID == scanData.FK_LOCATION_ROOM_READER_ID
-        && lastScan.IS_WALK_IN) {
+    console.log("IN EQUIPMENTLOCATION ---- lastScan:", lastScan);
+
+    console.log("lastScan FK_LOCATION_ROOM_READER_ID ", lastScan[0].FK_LOCATION_ROOM_READER_ID);
+    console.log("scanData FK_LOCATION_ROOM_READER_ID ", scanData.FK_LOCATION_ROOM_READER_ID);
+    console.log("lastScan IS_WALK_IN ", lastScan[0].IS_WALK_IN);
+
+    console.log(lastScan[0].FK_LOCATION_ROOM_READER_ID
+                == scanData.FK_LOCATION_ROOM_READER_ID);
+
+    if ((lastScan[0].FK_LOCATION_ROOM_READER_ID == scanData.FK_LOCATION_ROOM_READER_ID)
+        && lastScan[0].IS_WALK_IN == 1) {
+        console.log("----------WALK OUT")
         return false;
     }
+    console.log("-------------WALK IN");
     return true;
 }
 
