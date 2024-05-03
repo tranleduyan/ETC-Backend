@@ -20,13 +20,15 @@ const gHelper = require("../../../utils/interfaces/IHelperFunctions");
  *     "reservationStatus": "Available" OR "In Use",
  *     "usageCondition": "Used" OR "New",
  *     "purchaseCost": 1102.23,
- *     "purchaseDate": "2016-12-08"
+ *     "purchaseDate": "2016-12-08",
+ *     "homeLocations": []
  * }
  * 
  * Response is the message with status code 200 if successful, 400 or 404 if unsuccessful
  * Else return a server error of status code 503 (see ResponsiveBuilder.js) - the error are trying to input invalid format to database or any thing else that cannot be seen forward
  */
 async function EquipmentAddition(res, req) {
+    const trx = await db.transaction();
     try {
         /** Validate add equipment body to see if information they request to our endpoint is valid */
         const errors = await Promise.resolve(EquipmentAdditionValidation(res, req));
@@ -36,7 +38,7 @@ async function EquipmentAddition(res, req) {
 
         /** If validation pass, we need to destructure variables (see above) from the request body for use. */
         // TODO: get RFID/locaation info from request?
-        const { serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+        const { serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, homeLocations } = req;
 
         /** optional param purchase cost (null by default) */
         let costData = null;
@@ -70,13 +72,31 @@ async function EquipmentAddition(res, req) {
 		}
 
 		/** Insert data into the table */
-		await db("equipment").insert(insertData);
+		const insertedIds = await trx("equipment").insert(insertData).returning("PK_EQUIPMENT_SERIAL_ID");
+        const newEquipmentId = insertedIds[0];
+
+        const insertHomeLocationPromises = [];
+        for(const locationId of homeLocations) {
+            insertHomeLocationPromises.push(trx("equipment_home").insert(
+                {
+                    FK_LOCATION_ID: locationId,
+                    FK_EQUIPMENT_SERIAL_ID: newEquipmentId
+                }
+            ))
+        }
+
+        await Promise.all(insertHomeLocationPromises);
+
+        /** Commit the transaction */
+        await trx.commit();
 
         /** Return a success response */
         return responseBuilder.BuildResponse(res, 200, {
             message: "New equipment added successfully.",
         });
     } catch(error) {
+        /** If error, rollback transaction */
+        await trx.rollback();
         /** adding error, easy to debug */
         console.log("ERROR: There is an error while adding equipment: ", error);
         /** Return error message to client */
@@ -93,7 +113,7 @@ async function EquipmentAddition(res, req) {
 async function EquipmentAdditionValidation(res, req) {
     try{
         /** Destructure variables from the request body */
-        const { schoolId, serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate } = req;
+        const { schoolId, serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, homeLocations } = req;
         
         /** We check for all required variables */
         if(!schoolId || !serialId || typeof(typeId) == "undefined" || typeof(modelId) == "undefined" || !maintenanceStatus || !reservationStatus || !usageCondition) {
@@ -134,6 +154,19 @@ async function EquipmentAdditionValidation(res, req) {
             const purchaseDateError = PurchaseDateValidator(res, purchaseDate);
             if(purchaseDateError) {
                 return purchaseDateError;
+            }
+        }
+
+        /** If user add home locations for equipment also, validate it to be array type */
+        if(homeLocations && !Array.isArray(homeLocations)) {
+            return responseBuilder.BadRequest(res, "Invalid request type.");
+        }
+
+        /** Ensure all home location that is given by user is valid location */
+        if(homeLocations && homeLocations.length > 0) {
+            const locations = await db("location").select("PK_LOCATION_ID").whereIn("PK_LOCATION_ID", homeLocations);
+            if(locations && (locations.length !== homeLocations.length)) {
+                return responseBuilder.BadRequest(res, "One of the home location is not exists.");
             }
         }
         
