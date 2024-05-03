@@ -20,6 +20,7 @@ async function GetLocationInformationById(db, locationId) {
         "scan_history.SCAN_TIME AS scanTime",
         "scan_history.FK_SCHOOL_TAG_ID AS studentTagId",
         "scan_history.PK_SCAN_HISTORY_ID AS scanHistoryId",
+        "equipment.PK_EQUIPMENT_SERIAL_ID AS serialId",
         db.raw(
           "CONCAT(user_info.LAST_NAME, ', ', user_info.FIRST_NAME) AS fullName"
         )
@@ -42,6 +43,12 @@ async function GetLocationInformationById(db, locationId) {
         "user_info.TAG_ID",
         "=",
         "scan_history.FK_SCHOOL_TAG_ID"
+      )
+      .leftJoin(
+        "equipment",
+        "equipment.TAG_ID",
+        "=",
+        "scan_history.FK_EQUIPMENT_TAG_ID"
       )
       .where("reader_location.FK_LOCATION_ID", "=", locationId)
       .orderBy("scan_history.SCAN_TIME", "DESC")
