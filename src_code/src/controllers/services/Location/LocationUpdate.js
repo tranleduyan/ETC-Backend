@@ -58,7 +58,7 @@ async function ValidateLocationUpdate(res, req, locationId) {
 
     /** If no newLocationName provided, there is nothing to do */
     if(!newLocationName) {
-      return responseBuilder.BadRequest(res, null, "No changes is made.");
+      return responseBuilder.BadRequest(res, null, "No changes was made.");
     }
 
     /** Create promise to retrieve user information, location information, and exist location to ensure no duplicate name during update */

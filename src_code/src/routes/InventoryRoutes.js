@@ -691,5 +691,33 @@ router.get("/antenna", async(_, response) => {
         return responseBuilder.ServerError(response, "There is an error while retrieving all antennas.");
     }
 })
+
+/**
+ * DELETE/REMOVING ANTENNAS
+ * URL => /api/inventory/antenna
+ * 
+ * Request Body: 
+ * {
+ *      "schoolId": string,
+ *      "antennaIds": array of number
+ * }
+ */
+router.delete("/antenna", async (request, response) => {
+    try {
+        /** If there is no request body, then we return the request body is empty */
+        if(!request.body || Object.keys(request.body).length === 0) {
+            /** Return request body is empty */
+            return responseBuilder.MissingContent(response, "RB");
+        } 
+        
+        /** Perform action */
+        return await Promise.resolve(inventoryServices.AntennaRemoval(response, request.body));
+    } catch(error) {
+        /** If error, log error and return 503 */
+        console.log("ERROR: There is an error while deleting antennas:", error);
+        return responseBuilder.ServerError(response, "There is an error while deleting antennas.")
+    }
+})
+
 /** Exports the router */
 module.exports = router;

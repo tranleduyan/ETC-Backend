@@ -1,6 +1,4 @@
-const { request } = require("express");
 const dbHelperUser = require("../user/UserDBHelperFunctions");
-const userDBHelperFunctions = require("../user/UserDBHelperFunctions");
 
 /**
  * This function is used to retrieve information of a equipment by it's primary key (serial ID).
