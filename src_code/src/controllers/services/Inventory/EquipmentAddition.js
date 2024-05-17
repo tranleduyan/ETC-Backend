@@ -74,17 +74,12 @@ async function EquipmentAddition(res, req) {
 		/** Insert data into the table */
 		await trx("equipment").insert(insertData);
 
-        const insertHomeLocationPromises = [];
-        for(const locationId of homeLocations) {
-            insertHomeLocationPromises.push(trx("equipment_home").insert(
-                {
-                    FK_LOCATION_ID: locationId,
-                    FK_EQUIPMENT_SERIAL_ID: serialId.trim(),
-                }
-            ))
-        }
+        const newHomeLocationData = homeLocations.map(homeLocation => ({
+            FK_LOCATION_ID: homeLocation,
+            FK_EQUIPMENT_SERIAL_ID: serialId.trim()
+        }))
 
-        await Promise.all(insertHomeLocationPromises);
+        await trx("equipment_home").insert(newHomeLocationData)
 
         /** Commit the transaction */
         await trx.commit();

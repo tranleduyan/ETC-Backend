@@ -28,6 +28,7 @@ const gHelper = require("../../../utils/interfaces/IHelperFunctions");
  * Else return a server error of status code 503 (see ResponsiveBuilder.js) - the error are trying to input invalid format to database or any thing else that cannot be seen forward
  */
 async function EquipmentUpdate(res, req, serialId) {
+    const trx = await db.transaction();
     try{
         /** Validate information before communicate with database */
         const errors = await Promise.resolve(EquipmentUpdateValidation(res, req, serialId));
@@ -36,7 +37,7 @@ async function EquipmentUpdate(res, req, serialId) {
         }
 
         /** Destructure variables from request body */
-        const { typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, rfidTag } = req;
+        const { typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, rfidTag, homeLocations } = req;
         let equipmentInfo = {};
         
         /** Checking if optional variables exist (and if so, add to update request) */
@@ -71,11 +72,29 @@ async function EquipmentUpdate(res, req, serialId) {
         if(rfidTag) {
             equipmentInfo["TAG_ID"] = rfidTag;
         }
+        
+        const deleteEquipmentHomePromises = trx("equipment_home")
+            .where("FK_EQUIPMENT_SERIAL_ID", "=", serialId.trim())
+            .del();
 
         /** Update the equipment */
-        await db("equipment")
+        const updateEquipmentPromises = trx("equipment")
             .update(equipmentInfo)  
             .where("PK_EQUIPMENT_SERIAL_ID", "=", serialId.trim());
+
+        await Promise.all([deleteEquipmentHomePromises, updateEquipmentPromises]);
+
+        /** Insert new home locations */
+        if(homeLocations?.length > 0) {
+            const newHomeLocationData = homeLocations.map(homeLocation => ({
+                FK_LOCATION_ID: homeLocation,
+                FK_EQUIPMENT_SERIAL_ID: serialId.trim()
+            }))
+    
+            await trx("equipment_home").insert(newHomeLocationData);
+        }
+    
+        await trx.commit();
 
         /** Return update successful message */
         return responseBuilder.UpdateSuccessful(res, null, "Equipment");
@@ -95,7 +114,7 @@ async function EquipmentUpdate(res, req, serialId) {
 async function EquipmentUpdateValidation(res, req, serialId) {
     try{
         /** Destructure variables from the request body */
-        const { schoolId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, rfidTag } = req;
+        const { schoolId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, rfidTag, homeLocations } = req;
         
         /** We check for all required variables */
         if(!schoolId) {
@@ -143,6 +162,19 @@ async function EquipmentUpdateValidation(res, req, serialId) {
             const existRfidTag = await db("equipment").select("PK_EQUIPMENT_SERIAL_ID").where("TAG_ID", "=", rfidTag.toLowerCase()).first();
             if(existRfidTag && existRfidTag.PK_EQUIPMENT_SERIAL_ID.toLowerCase() !== serialId?.trim().toLowerCase()) {
                 return responseBuilder.BadRequest(res, "This RFID Tag is already in used.")
+            }
+        }
+
+        /** If user add home locations for equipment also, validate it to be array type */
+        if(homeLocations && !Array.isArray(homeLocations)) {
+            return responseBuilder.BadRequest(res, "Invalid request type.");
+        }
+
+        /** Ensure all home location that is given by user is valid location */
+        if(homeLocations && homeLocations.length > 0) {
+            const locations = await db("location").select("PK_LOCATION_ID").whereIn("PK_LOCATION_ID", homeLocations);
+            if(locations && (locations.length !== homeLocations.length)) {
+                return responseBuilder.BadRequest(res, "One of the home location is not exists.");
             }
         }
 
