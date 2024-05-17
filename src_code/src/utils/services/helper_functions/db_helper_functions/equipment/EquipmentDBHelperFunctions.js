@@ -42,7 +42,10 @@ async function GetEquipmentBySerialId(db, serialId) {
 
     /** Create promise to get home room list of the equipment */
     const getEquipmentHomeRoomListPromise = db
-      .select("location.LOCATION_NAME AS locationName")
+      .select(
+        "location.LOCATION_NAME AS locationName",
+        "location.PK_LOCATION_ID AS locationId"
+      )
       .from("equipment_home")
       .leftJoin(
         "location",
@@ -146,7 +149,10 @@ async function GetEquipmentBySerialId(db, serialId) {
       homeRooms:
         equipmentHomeRoomList.length === 0
           ? []
-          : equipmentHomeRoomList.map((room) => room.locationName),
+          : equipmentHomeRoomList.map((room) => ({
+              locationId: room.locationId,
+              locationName: room.locationName,
+            })),
       usageHistory:
         equipmentUsageHistoryList.length === 0 ? [] : equipmentUsageHistoryList,
     };
