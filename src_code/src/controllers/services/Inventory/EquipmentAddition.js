@@ -72,15 +72,14 @@ async function EquipmentAddition(res, req) {
 		}
 
 		/** Insert data into the table */
-		const insertedIds = await trx("equipment").insert(insertData).returning("PK_EQUIPMENT_SERIAL_ID");
-        const newEquipmentId = insertedIds[0];
+		await trx("equipment").insert(insertData);
 
         const insertHomeLocationPromises = [];
         for(const locationId of homeLocations) {
             insertHomeLocationPromises.push(trx("equipment_home").insert(
                 {
                     FK_LOCATION_ID: locationId,
-                    FK_EQUIPMENT_SERIAL_ID: newEquipmentId
+                    FK_EQUIPMENT_SERIAL_ID: serialId.trim(),
                 }
             ))
         }
