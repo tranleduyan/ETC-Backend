@@ -99,6 +99,8 @@ async function EquipmentUpdate(res, req, serialId) {
         /** Return update successful message */
         return responseBuilder.UpdateSuccessful(res, null, "Equipment");
     } catch(error) {
+        /** If error, roll back */
+        await trx.rollback();
         /** Log errors and return 503 */
         console.log("ERROR: There is an error while updating equipment:", error);
         return responseBuilder.ServerError(res, "There is an error while updating equipment.")

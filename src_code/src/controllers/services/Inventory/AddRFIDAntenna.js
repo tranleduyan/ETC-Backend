@@ -80,6 +80,13 @@ async function ValidateAddRFIDAntenna(res, req) {
       return responseBuilder.BadRequest(res, "Invalid type of location.")
     }
     
+    if(req.locationId) {
+      const location = await db("location").select("PK_LOCATION_ID").where("PK_LOCATION_ID", "=", req.locationId).first();
+      if(!location) {
+        return responseBuilder.BadRequest(res, "Location not exists.");
+      }
+    }
+    
     /** Return null indicating successful */
     return null;
   } catch(error) {

@@ -74,9 +74,13 @@ async function ValidateAntennaUpdate(res, req, antennaId) {
     .select("FK_LOCATION_ID")
     .where("PK_READER_TAG_ID", "=", antennaId.trim())
     .first();
+    const newAntennaExistedPromise = db("reader_location")
+    .select("FK_LOCATION_ID")
+    .where("PK_READER_TAG_ID", "=", newAntennaId.trim())
+    .first();
 
     /** Perform promises at once */
-    const [user, antennaInformation] = await Promise.all([userPromise, antennaInformationPromise]);
+    const [user, antennaInformation, newAntennaExisted] = await Promise.all([userPromise, antennaInformationPromise, newAntennaExistedPromise]);
 
     /** If user not exists, we cannot perform this action, return 404 */
     if(!user) {
@@ -86,6 +90,10 @@ async function ValidateAntennaUpdate(res, req, antennaId) {
     /** If antenna is not exists, we cannot perform this action, return 404 */
     if(!antennaInformation) {
       return responseBuilder.NotFound(res, "Antenna");
+    }
+
+    if(newAntennaExisted) {
+      return responseBuilder.BadRequest(res, "This antenna ID already exists. RFID Antenna ID must be unique.")
     }
 
     /** If user is not administrator, we cannot let them perform this action,  */
