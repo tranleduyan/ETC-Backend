@@ -27,4 +27,5 @@ module.exports = {
   GetLocationInformationById:
     locationDBHelperFunctions.GetLocationInformationById,
   GetAllAntennas: antennaDBHelperFunctions.GetAllAntennas,
+  GetAntennaInformationById: antennaDBHelperFunctions.GetAntennaInformationById
 };

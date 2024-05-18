@@ -892,5 +892,25 @@ router.put("/antenna/:antennaId", async (request, response) => {
   }
 });
 
+/**
+ * GET/RETRIEVE ANTENNA INFORMATION
+ * URL => /api/inventory/antenna/{antennaId}
+ * 
+ * No request body.
+ */
+router.get("/antenna/:antennaId", async (request, response) => {
+  try {
+    /** Retrieve antennaId */
+    const antennaId = request.params.antennaId;
+
+    /** Perform action */
+    return await Promise.resolve(inventoryServices.GetAntennaInformation(response, antennaId))
+  } catch(error) {
+    /** If error, log error and return 503 */
+    console.log("ERROR: There is an error while retrieving antenna information:", error);
+    return responseBuilder.ServerError(response, "There is an error while retrieving antenna information.")
+  }
+})
+
 /** Exports the router */
 module.exports = router;
