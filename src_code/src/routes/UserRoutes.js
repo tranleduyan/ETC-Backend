@@ -90,5 +90,40 @@ router.put("/:schoolId/action", async (request, response) => {
   }
 });
 
+/**
+ * GET/RETRIEVE USER EQUIPMENT USAGE
+ * URL => /api/user/{schoolId}/equipment-usage
+ * 
+ * Response Object: {
+ *    recentlyUsed: [
+ *      scanHistoryId: number,
+ *      serialId: string,
+ *      locationName: string,
+ *      fullName: string,
+ *      reservationStatus: string
+ *    ],
+ *    currentlyUsed: [
+ *      scanHistoryId: number,
+ *      serialId: string,
+ *      locationName: string,
+ *      fullName: string,
+ *      reservationStatus: string
+ *    ]
+ * }
+ */
+router.get("/:schoolId/equipment-usage", async (request, response) => {
+  try {
+    /** Get School Id */
+    const schoolId = request.params.schoolId;
+
+    /** Perform action */
+    return await Promise.resolve(userServices.GetUserUsage(response, schoolId));
+  } catch(error) {
+    /** If error, log error and return 503 */
+    console.log("ERROR: There is an error while retrieving user equipment usage:", error);
+    return responseBuilder.ServerError(response, "There is an error while retrieving user equipment usage.");
+  }
+})
+
 /** Exports the router */
 module.exports = router;

@@ -148,8 +148,78 @@ async function CheckUserExistsByTag(db, tagId) {
   }
 }
 
+/**
+ * Retrieves user usage statistics based on the provided school ID.
+ * @param {Object} db - The database instance.
+ * @param {number} schoolId - The school ID to retrieve user usage for.
+ * @returns {Object} An object containing usage statistics for the user.
+ * @throws {string|Error} If there is an error while retrieving user usage statistics.
+ */
+async function GetUserUsage(db, schoolId) {
+  try {
+    const getUserRecentlyUsedQuery = db
+    .select(
+      db.raw('MAX(scan_history.PK_SCAN_HISTORY_ID) AS scanHistoryId'),
+      'equipment.PK_EQUIPMENT_SERIAL_ID AS serialId',
+      db.raw("CONCAT(MAX(user_info.LAST_NAME), ', ', MAX(user_info.FIRST_NAME)) AS fullName"),
+      db.raw('MAX(location.LOCATION_NAME) AS locationName'),
+      db.raw('MAX(equipment.RESERVATION_STATUS) AS reservationStatus')
+    )
+    .from('scan_history')
+    .leftJoin('equipment', 'equipment.TAG_ID', '=', 'scan_history.FK_EQUIPMENT_TAG_ID')
+    .leftJoin('user_info', 'user_info.TAG_ID', '=', 'scan_history.FK_SCHOOL_TAG_ID')
+    .leftJoin('reader_location', 'reader_location.PK_READER_TAG_ID', '=', 'scan_history.FK_LOCATION_ROOM_READER_ID')
+    .leftJoin('location', 'location.PK_LOCATION_ID', '=', 'reader_location.FK_LOCATION_ID')
+    .where('user_info.SCHOOL_ID', schoolId)
+    .where('scan_history.IS_WALK_IN', 1)
+    .where('scan_history.SCAN_TIME', '>=', db.raw('DATE_SUB(NOW(), INTERVAL 1 WEEK)'))
+    .groupBy('equipment.PK_EQUIPMENT_SERIAL_ID')
+
+    const getUserCurrentlyUsedQuery = db
+    .select(
+      db.raw('MAX(scan_history.PK_SCAN_HISTORY_ID) AS scanHistoryId'),
+      'equipment.PK_EQUIPMENT_SERIAL_ID AS serialId',
+      db.raw("CONCAT(MAX(user_info.LAST_NAME), ', ', MAX(user_info.FIRST_NAME)) AS fullName"),
+      db.raw('MAX(location.LOCATION_NAME) AS locationName'),
+      db.raw('MAX(equipment.RESERVATION_STATUS) AS reservationStatus')
+    )
+    .from('scan_history')
+    .leftJoin('equipment', 'equipment.TAG_ID', '=', 'scan_history.FK_EQUIPMENT_TAG_ID')
+    .leftJoin('user_info', 'user_info.TAG_ID', '=', 'scan_history.FK_SCHOOL_TAG_ID')
+    .leftJoin('reader_location', 'reader_location.PK_READER_TAG_ID', '=', 'scan_history.FK_LOCATION_ROOM_READER_ID')
+    .leftJoin('location', 'location.PK_LOCATION_ID', '=', 'reader_location.FK_LOCATION_ID')
+    .where('user_info.SCHOOL_ID', schoolId)
+    .where('equipment.RESERVATION_STATUS', 'like', 'In Use')
+    .groupBy('equipment.PK_EQUIPMENT_SERIAL_ID');
+
+    const result = await db.raw(`(${getUserRecentlyUsedQuery.toString()}) UNION ALL (${getUserCurrentlyUsedQuery.toString()})`);
+    
+    /** If result not found, user has no records */
+    if(result && result.length === 0) {
+      return {
+        recentlyUsed: [],
+        currentlyUsed: []
+      }
+    }
+
+    const recentlyUsed = result.filter(row => row.reservationStatus === 'Available');
+    const currentlyUsed = result.filter(row => row.reservationStatus === 'In Use');
+
+    /** Return object usage */
+    return {
+      recentlyUsed: recentlyUsed,
+      currentlyUsed: currentlyUsed
+    }
+  } catch(error) {
+    /** If error, log error and return error message*/
+    console.log(`ERROR: There is an error while retrieving user usage:`, error);
+    return `There is an error while retrieving user usage.`
+  } 
+} 
+
 module.exports = {
   GetUserInfoByEmailAddress,
   GetUserInfoBySchoolId,
   CheckUserExistsByTag,
-};
+  GetUserUsage,
+}
