@@ -59,33 +59,33 @@ async function GetAntennaInformationById(db, antennaId) {
   try {
     /** Perform get antenna information */
     const antenna = await db("reader_location")
-    .select(
-      "reader_location.PK_READER_TAG_ID AS antennaId",
-      "location.LOCATION_NAME AS locationName"
-    )
-    .leftJoin(
-      "location",
-      "location.PK_LOCATION_ID",
-      "=",
-      "reader_location.FK_LOCATION_ID"
-    )
-    .where(
-      "reader_location.PK_READER_TAG_ID", 
-      "=",
-      antennaId
-    )
-    .first();
+      .select(
+        "reader_location.PK_READER_TAG_ID AS antennaId",
+        "location.LOCATION_NAME AS locationName",
+        "location.PK_LOCATION_ID as locationId"
+      )
+      .leftJoin(
+        "location",
+        "location.PK_LOCATION_ID",
+        "=",
+        "reader_location.FK_LOCATION_ID"
+      )
+      .where("reader_location.PK_READER_TAG_ID", "=", antennaId)
+      .first();
 
     /** If antenna not found, return null */
-    if(!antenna) {
+    if (!antenna) {
       return null;
     }
 
     /** If antenna found, return it */
     return antenna;
-  } catch(error) {
+  } catch (error) {
     /** If error, log error and return error string */
-    console.log("ERROR: There is an error while retrieving antenna information:", error);
+    console.log(
+      "ERROR: There is an error while retrieving antenna information:",
+      error
+    );
     return "There is an error while retrieving antenna information.";
   }
 }
@@ -93,5 +93,5 @@ async function GetAntennaInformationById(db, antennaId) {
 /** Export the modules */
 module.exports = {
   GetAllAntennas,
-  GetAntennaInformationById
+  GetAntennaInformationById,
 };
