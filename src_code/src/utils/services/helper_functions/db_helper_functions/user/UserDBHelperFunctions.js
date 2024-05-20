@@ -202,7 +202,13 @@ async function GetUserUsage(db, schoolId) {
     .where('equipment.RESERVATION_STATUS', 'like', 'In Use')
     .groupBy('equipment.PK_EQUIPMENT_SERIAL_ID');
 
-    const result = await db.raw(`(${getUserRecentlyUsedQuery.toString()}) UNION ALL (${getUserCurrentlyUsedQuery.toString()})`);
+    const result = await db.raw(`
+    SELECT * FROM (
+      (${getUserRecentlyUsedQuery.toString()})
+      UNION ALL
+      (${getUserCurrentlyUsedQuery.toString()})
+    ) AS combinedResults
+    ORDER BY scanHistoryId DESC`);
     
     const dataRetrieved = result[0];
     /** If result not found, user has no records */
@@ -213,13 +219,27 @@ async function GetUserUsage(db, schoolId) {
       }
     }
 
-    const recentlyUsed = dataRetrieved.filter(row => row.reservationStatus === 'Available');
-    const currentlyUsed = dataRetrieved.filter(row => row.reservationStatus === 'In Use');
+    const cleanRecentlyUsedIds = new Set();
+    const cleanCurrentlyUsedIds = new Set();
+
+    const cleanRecentlyUsed = [];
+    const cleanCurrentlyUsed = [];
+
+    dataRetrieved.forEach(item => {
+      if (item.reservationStatus === 'Available' && !cleanRecentlyUsedIds.has(item.serialId)) {
+        cleanRecentlyUsed.push(item);
+        cleanRecentlyUsedIds.add(item.serialId);
+      }
+      if (item.reservationStatus === 'In Use' && !cleanCurrentlyUsedIds.has(item.serialId)) {
+        cleanCurrentlyUsed.push(item);
+        cleanCurrentlyUsedIds.add(item.serialId);
+      }
+    });
 
     /** Return object usage */
     return {
-      recentlyUsed: recentlyUsed,
-      currentlyUsed: currentlyUsed
+      recentlyUsed: cleanRecentlyUsed,
+      currentlyUsed: cleanCurrentlyUsed
     }
   } catch(error) {
     /** If error, log error and return error message*/
