@@ -18,35 +18,42 @@ const dbHelpers = require("../../../utils/interfaces/IDBHelperFunctions");
  * @throws {Error} - Logs and returns a 503 Server Error response in case of any unexpected errors.
  */
 async function GetAntennaInformation(res, antennaId) {
-  try{
-    /** If invalid antennaId return 400 */
-    if(antennaId && isNaN(parseInt(antennaId, 10))) {
-      return responseBuilder.BadRequest(res, "Invalid request.");
-    } 
-  
+  try {
     /** Perform get antenna information */
-    const antennaInformation = await Promise.resolve(dbHelpers.GetAntennaInformationById(db, antennaId));
+    const antennaInformation = await Promise.resolve(
+      dbHelpers.GetAntennaInformationById(db, antennaId)
+    );
 
     /** If antenna not found, return 404 */
-    if(!antennaInformation) {
+    if (!antennaInformation) {
       return responseBuilder.NotFound(res, "Antenna");
     }
 
     /** If error while get antenna information, return 503 */
-    if(typeof antennaInformation === "string") {
+    if (typeof antennaInformation === "string") {
       return responseBuilder.ServerError(res, antennaInformation);
     }
 
     /** Return Get Successful */
-    return responseBuilder.GetSuccessful(res, antennaInformation, "Antenna information");
-  } catch(error) {
+    return responseBuilder.GetSuccessful(
+      res,
+      antennaInformation,
+      "Antenna information"
+    );
+  } catch (error) {
     /** If error, log error and return 503 */
-    console.log("ERROR: There is an error while retrieved antenna information:", error);
-    return responseBuilder.ServerError(res, "There is an error while retrieved information.");
+    console.log(
+      "ERROR: There is an error while retrieved antenna information:",
+      error
+    );
+    return responseBuilder.ServerError(
+      res,
+      "There is an error while retrieved information."
+    );
   }
 }
 
 /** Export the module */
 module.exports = {
-  GetAntennaInformation
-}
+  GetAntennaInformation,
+};
