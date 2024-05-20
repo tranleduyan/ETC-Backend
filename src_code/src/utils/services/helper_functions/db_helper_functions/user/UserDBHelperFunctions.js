@@ -163,13 +163,18 @@ async function GetUserUsage(db, schoolId) {
       'equipment.PK_EQUIPMENT_SERIAL_ID AS serialId',
       db.raw("CONCAT(MAX(user_info.LAST_NAME), ', ', MAX(user_info.FIRST_NAME)) AS fullName"),
       db.raw('MAX(location.LOCATION_NAME) AS locationName'),
-      db.raw('MAX(equipment.RESERVATION_STATUS) AS reservationStatus')
+      db.raw('MAX(equipment.RESERVATION_STATUS) AS reservationStatus'),
+      "equipment_model.MODEL_PHOTO_URL AS modelPhoto",
+      "equipment_model.MODEL_NAME AS modelName",
+      "equipment_type.TYPE_NAME AS typeName"
     )
     .from('scan_history')
     .leftJoin('equipment', 'equipment.TAG_ID', '=', 'scan_history.FK_EQUIPMENT_TAG_ID')
     .leftJoin('user_info', 'user_info.TAG_ID', '=', 'scan_history.FK_SCHOOL_TAG_ID')
     .leftJoin('reader_location', 'reader_location.PK_READER_TAG_ID', '=', 'scan_history.FK_LOCATION_ROOM_READER_ID')
     .leftJoin('location', 'location.PK_LOCATION_ID', '=', 'reader_location.FK_LOCATION_ID')
+    .leftJoin("equipment_model", "equipment_model.PK_MODEL_ID", "equipment.FK_MODEL_ID")
+    .leftJoin("equipment_type", "equipment_type.PK_TYPE_ID", "equipment_model.FK_TYPE_ID")
     .where('user_info.SCHOOL_ID', schoolId)
     .where('scan_history.IS_WALK_IN', 1)
     .where('scan_history.SCAN_TIME', '>=', db.raw('DATE_SUB(NOW(), INTERVAL 1 WEEK)'))
@@ -181,29 +186,35 @@ async function GetUserUsage(db, schoolId) {
       'equipment.PK_EQUIPMENT_SERIAL_ID AS serialId',
       db.raw("CONCAT(MAX(user_info.LAST_NAME), ', ', MAX(user_info.FIRST_NAME)) AS fullName"),
       db.raw('MAX(location.LOCATION_NAME) AS locationName'),
-      db.raw('MAX(equipment.RESERVATION_STATUS) AS reservationStatus')
+      db.raw('MAX(equipment.RESERVATION_STATUS) AS reservationStatus'),
+      "equipment_model.MODEL_PHOTO_URL AS modelPhoto",
+      "equipment_model.MODEL_NAME AS modelName",
+      "equipment_type.TYPE_NAME AS typeName"
     )
     .from('scan_history')
     .leftJoin('equipment', 'equipment.TAG_ID', '=', 'scan_history.FK_EQUIPMENT_TAG_ID')
     .leftJoin('user_info', 'user_info.TAG_ID', '=', 'scan_history.FK_SCHOOL_TAG_ID')
     .leftJoin('reader_location', 'reader_location.PK_READER_TAG_ID', '=', 'scan_history.FK_LOCATION_ROOM_READER_ID')
     .leftJoin('location', 'location.PK_LOCATION_ID', '=', 'reader_location.FK_LOCATION_ID')
+    .leftJoin("equipment_model", "equipment_model.PK_MODEL_ID", "equipment.FK_MODEL_ID")
+    .leftJoin("equipment_type", "equipment_type.PK_TYPE_ID", "equipment_model.FK_TYPE_ID")
     .where('user_info.SCHOOL_ID', schoolId)
     .where('equipment.RESERVATION_STATUS', 'like', 'In Use')
     .groupBy('equipment.PK_EQUIPMENT_SERIAL_ID');
 
     const result = await db.raw(`(${getUserRecentlyUsedQuery.toString()}) UNION ALL (${getUserCurrentlyUsedQuery.toString()})`);
     
+    const dataRetrieved = result[0];
     /** If result not found, user has no records */
-    if(result && result.length === 0) {
+    if(dataRetrieved[0] && dataRetrieved[0].length === 0) {
       return {
         recentlyUsed: [],
         currentlyUsed: []
       }
     }
 
-    const recentlyUsed = result.filter(row => row.reservationStatus === 'Available');
-    const currentlyUsed = result.filter(row => row.reservationStatus === 'In Use');
+    const recentlyUsed = dataRetrieved.filter(row => row.reservationStatus === 'Available');
+    const currentlyUsed = dataRetrieved.filter(row => row.reservationStatus === 'In Use');
 
     /** Return object usage */
     return {

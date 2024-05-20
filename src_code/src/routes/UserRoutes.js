@@ -101,13 +101,19 @@ router.put("/:schoolId/action", async (request, response) => {
  *      locationName: string,
  *      fullName: string,
  *      reservationStatus: string
+ *      typeName: string,
+ *      modelName: string,
+ *      modelPhoto: string
  *    ],
  *    currentlyUsed: [
  *      scanHistoryId: number,
  *      serialId: string,
  *      locationName: string,
  *      fullName: string,
- *      reservationStatus: string
+ *      reservationStatus: string,
+ *      typeName: string,
+ *      modelName: string,
+ *      modelPhoto: string
  *    ]
  * }
  */
