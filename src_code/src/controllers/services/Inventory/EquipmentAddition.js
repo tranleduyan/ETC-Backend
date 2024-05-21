@@ -38,7 +38,7 @@ async function EquipmentAddition(res, req) {
 
         /** If validation pass, we need to destructure variables (see above) from the request body for use. */
         // TODO: get RFID/locaation info from request?
-        const { serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, homeLocations } = req;
+        const { serialId, typeId, modelId, maintenanceStatus, reservationStatus, rfidTag, usageCondition, purchaseCost, purchaseDate, homeLocations } = req;
 
         /** optional param purchase cost (null by default) */
         let costData = null;
@@ -63,7 +63,7 @@ async function EquipmentAddition(res, req) {
 			FK_TYPE_ID: typeId,
 			FK_MODEL_ID: modelId,
             FK_CURRENT_ROOM_READER_ID: null,
-            TAG_ID: null,
+            TAG_ID: rfidTag?.trim(),
 			MAINTENANCE_STATUS: maintenanceStatus.trim(),
 			RESERVATION_STATUS: reservationStatus.trim(),
 			USAGE_CONDITION: usageCondition.trim(),

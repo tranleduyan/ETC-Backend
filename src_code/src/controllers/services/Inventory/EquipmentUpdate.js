@@ -61,16 +61,17 @@ async function EquipmentUpdate(res, req, serialId) {
             equipmentInfo["USAGE_CONDITION"] = usageCondition;
         }
 
-        if(purchaseCost){
-            equipmentInfo["PURCHASE_COST"] = purchaseCost;
-        }
+        equipmentInfo["PURCHASE_COST"] = purchaseCost;
 
         if(purchaseDate){
             equipmentInfo["PURCHASE_DATE"] = purchaseDate;
         }
 
-        if(rfidTag) {
+        if(rfidTag !== "") {
             equipmentInfo["TAG_ID"] = rfidTag;
+        }
+        else {
+            equipmentInfo["TAG_ID"] = null;
         }
         
         const deleteEquipmentHomePromises = trx("equipment_home")
