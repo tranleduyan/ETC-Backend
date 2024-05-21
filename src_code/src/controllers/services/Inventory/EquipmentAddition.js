@@ -81,10 +81,11 @@ async function EquipmentAddition(res, req) {
 
         if(homeLocations.length > 0){
             await trx("equipment_home").insert(newHomeLocationData)
-
-            /** Commit the transaction */
-            await trx.commit();
         }
+        
+        /** Commit the transaction */
+        await trx.commit();
+        
         /** Return a success response */
         return responseBuilder.BuildResponse(res, 200, {
             message: "New equipment added successfully.",
