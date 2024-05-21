@@ -222,7 +222,7 @@ async function AddScanToDatabase(db, scanData) {
       console.log("---- LOCATION HANDLER ", isWalkIn);
 
       console.log("------- SENDING REQUEST");
-
+      console.log("items[",i,"] ",items[i]);
       //** If no student ID is in the package, do not call with student ID */
       if (studentId == "EMPTY") {
         responseObject.push(
@@ -242,15 +242,42 @@ async function AddScanToDatabase(db, scanData) {
           })
         );
 
-        //** Update status info of item with student in equipment table */
+        console.log("UPDATE USAGE STATUS");
+        console.log("items[i]", items[i]);
+        
+        //** Get PK_Serial_ID from equipment table using TAG_ID */
+        const itemSerialIDRaw = await db("equipment")
+        .select(
+          "PK_EQUIPMENT_SERIAL_ID")
+        .where("TAG_ID", "=", items[i])
+        .limit(1);
 
-        if (isWalkIn) {
+        const itemSerialID = itemSerialIDRaw[0].PK_EQUIPMENT_SERIAL_ID;
+
+        //** Get FK_LOCATION_ID (home room id) from equipment_home table using FK_EQUIPMENT_SERIAL_ID */
+        const homeRoomIDRaw = await db("equipment_home")
+        .select(
+          "FK_LOCATION_ID")
+        .where("FK_EQUIPMENT_SERIAL_ID", "=", itemSerialID)
+        .limit(1);
+
+        const homeRoomID = homeRoomIDRaw[0].FK_LOCATION_ID;
+
+        console.log("itemSerialID is: ", itemSerialID);
+        console.log("homeRoomID is: ", homeRoomID);
+
+        /* 
+        Update status info of item with student in equipment table, 
+        if is walk in and reader room matches home room, item considered returned
+        */
+        if (isWalkIn && (scanData.FK_LOCATION_ROOM_READER_ID == homeRoomID)) {
           responseObject.push(
             await db("equipment").where("TAG_ID", "=", items[i]).update({
               TAG_ID: items[i],
               RESERVATION_STATUS: "Available",
             })
           );
+          console.log("Item Marked Available");
         } else {
           responseObject.push(
             await db("equipment").where("TAG_ID", "=", items[i]).update({
@@ -258,6 +285,7 @@ async function AddScanToDatabase(db, scanData) {
               RESERVATION_STATUS: "In Use",
             })
           );
+          console.log("Item Marked In Use");
         }
       }
     }
