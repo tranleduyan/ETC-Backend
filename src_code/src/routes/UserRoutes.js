@@ -131,5 +131,30 @@ router.get("/:schoolId/equipment-usage", async (request, response) => {
   }
 })
 
+/**
+ * GET/RETRIEVE ALL USERS
+ * URL => /api/user/
+ * 
+ * Response Object: [
+ *    {
+ *       "lastName": "string",
+ *       "firstName": "string",
+ *       "middleName": "string",
+ *       "tagId": "string",
+ *       "emailAddress": "string",
+ *       "schoolId": "string",
+ *       "fullNameId": "FirstName LastName - ID: schoolId"
+ *    }
+ * ]
+ */
+router.get("/", async(_, response) => {
+  try {
+    return await Promise.resolve(userServices.GetAllUsers(response));
+  } catch(error) {
+    console.log("ERROR: There is error while retrieving all users:", error);
+    return responseBuilder.ServerError(response, "There is an error while retrieving all users.");
+  }
+})
+
 /** Exports the router */
 module.exports = router;
