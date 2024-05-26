@@ -149,10 +149,40 @@ router.get("/:schoolId/equipment-usage", async (request, response) => {
  */
 router.get("/", async(_, response) => {
   try {
+    /** Perform action */
     return await Promise.resolve(userServices.GetAllUsers(response));
   } catch(error) {
+    /** If error, log error and return 503 */
     console.log("ERROR: There is error while retrieving all users:", error);
     return responseBuilder.ServerError(response, "There is an error while retrieving all users.");
+  }
+})
+
+/**
+ * GET/RETRIEVE USER INFORMATION
+ * URL => /api/user/{schoolId}
+ * 
+ * Response Object: {
+ *       "lastName": "string",
+ *       "firstName": "string",
+ *       "middleName": "string",
+ *       "tagId": "string",
+ *       "emailAddress": "string",
+ *       "schoolId": "string",
+ *       "fullNameId": "FirstName LastName - ID: schoolId"
+ *    }
+ */
+router.get("/:schoolId", async (request, response) => {
+  try {
+    /** Retrieve school id */
+    const schoolId = request.params.schoolId;
+
+    /** Perform action */
+    return await Promise.resolve(userServices.GetUserInformation(response, schoolId));
+  } catch(error) {
+    /** If error, log error and return 503 */
+    console.log("ERROR: There is an error while retrieving user information:", error);
+    return responseBuilder.ServerError(response, "There is an error while retrieving information.");
   }
 })
 

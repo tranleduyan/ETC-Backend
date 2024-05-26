@@ -4,6 +4,7 @@ const GetRequestedReservationServices = require("../services/User/GetUserRequest
 const ApproveRejectCancelReservationServices = require("../services/User/ApproveRejectCancelReservation");
 const GetUserUsageServices = require("../services/User/GetUserUsage");
 const GetAllUsersServices = require("../services/User/GetAllUsers");
+const GetUserInformationServices = require("../services/User/GetUserInformation");
 
 /** Exports the modules */
 module.exports = {
@@ -13,5 +14,6 @@ module.exports = {
   ApproveRejectCancelReservation:
   ApproveRejectCancelReservationServices.ApproveRejectCancelReservation,
   GetUserUsage: GetUserUsageServices.GetUserUsage,
-  GetAllUsers: GetAllUsersServices.GetAllUsers
+  GetAllUsers: GetAllUsersServices.GetAllUsers,
+  GetUserInformation: GetUserInformationServices.GetUserInformation
 };
