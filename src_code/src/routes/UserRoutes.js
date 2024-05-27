@@ -186,5 +186,34 @@ router.get("/:schoolId", async (request, response) => {
   }
 })
 
+/** 
+ * PUT/UPDATE USER INFORMATION
+ * URL => /api/user/{schoolId}
+ * 
+ * Request Body: {
+ *  targetSchoolId: string (required),
+ *  firstName: string (required - max 25 char),
+ *  middleName: string (optional),
+ *  lastName: string (required - max 25 char),
+ *  emailAddress: string (required),
+ *  newSchoolId: string (required)
+ * }
+ * 
+ */
+router.put("/:schoolId", async(request, response) => {
+  try {
+    /** If there is no request body, then we return the request body is empty */
+    if (!request.body || Object.keys(request.body).length === 0) {
+      /** Return request body is empty */
+      return responseBuilder.MissingContent(response, "RB");
+    }
+
+    const schoolId = request.params.schoolId;
+    return await Promise.resolve(userServices.UpdateUserInformation(response, request.body, schoolId));
+  } catch(error){
+    console.log("ERROR: There is an error while updating user information:", error);
+    return responseBuilder.ServerError(response, "There is an error while updating information.")
+  }
+})
 /** Exports the router */
 module.exports = router;

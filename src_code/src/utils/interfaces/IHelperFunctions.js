@@ -10,4 +10,6 @@ module.exports = {
   DeleteDriveImage: generalHelperFunctions.DeleteDriveImage,
   DeleteDriveImages: generalHelperFunctions.DeleteDriveImages,
   RestoreDeletedDriveImage: generalHelperFunctions.RestoreDeletedDriveImage,
+  ConvertHEXStringToNumber: generalHelperFunctions.ConvertHEXStringToNumber,
+  ConvertNumberToHEXString: generalHelperFunctions.ConvertNumberToHEXString
 };

@@ -300,6 +300,34 @@ async function RestoreDeletedDriveImage(drive, imageDriveFileId) {
   }
 }
 
+function ConvertHEXStringToNumber(hexString, purpose = "tagId") {
+    if(typeof hexString !== 'string' || !/^[0-9A-Fa-f]+$/.test(hexString)) {
+      if(purpose === "tagId") {
+        return "Invalid TagId";
+      } else {
+        return "Invalid Hex string.";
+      }
+    }
+
+    return parseInt(hexString, 16);
+}
+
+function ConvertNumberToHEXString(number) {
+  // Check if the input is a valid number
+  if (typeof number !== 'number' || number < 0) {
+    return null;
+  }
+
+  // Convert the number to a hexadecimal string
+  let hexString = number.toString(16).toUpperCase();
+
+  // Optionally, pad the string with leading zeros to ensure a specific length
+  // For example, to ensure the string is at least 4 characters long:
+  hexString = hexString.padStart(4, '0');
+
+  return hexString;
+}
+
 /** Exports the modules */
 module.exports = {
   SendVerificationCode,
@@ -308,4 +336,6 @@ module.exports = {
   DeleteDriveImage,
   DeleteDriveImages,
   RestoreDeletedDriveImage,
+  ConvertHEXStringToNumber,
+  ConvertNumberToHEXString
 };
