@@ -108,6 +108,76 @@ async function EquipmentUpdate(res, req, serialId) {
     }
 }
 
+async function GetAvailableTagID() {
+    const start = 0;
+    const end = 4095;
+    const allNumbers = Array.from({ length: end - start + 1 }, (_, i) => i + start);
+  
+    const existingNumbers = await db("equipment")
+        .select("TAG_ID")
+        .orderBy("TAG_ID", "ASC");
+  
+    // Map existingNumbers to an array of strings
+    const existingNumbersArray = existingNumbers.map(obj => obj.TAG_ID);
+  
+    // Convert HEX string to numbers
+    const existingNumbersAsNumbers = existingNumbersArray.map(hexString => gHelper.ConvertHEXStringToNumber(hexString));
+  
+    // Filter the available numbers
+    const availableNumbers = allNumbers.filter(number => !existingNumbersAsNumbers.includes(number));
+  
+    if (availableNumbers.length === 0) {
+        return null;
+    }
+  
+    const hexAvailableNumbers = gHelper.ConvertNumberToHEXString(availableNumbers[0]);
+    if(!hexAvailableNumbers){
+      return null;
+    }
+    return hexAvailableNumbers;
+  }
+
+  async function TagIdValidator(res, rfidTag, serialId) {
+    try { 
+        if(typeof rfidTag !== "string") {
+            return responseBuilder.BadRequest(res, "Invalid request.");
+        }
+
+        /** Convert tagId from HEX to number */
+        const tagIdDec = gHelper.ConvertHEXStringToNumber(rfidTag.trim());
+        
+        if(typeof tagIdDec === "string") {
+            return responseBuilder.BadRequest(res, tagIdDec);
+        } 
+
+        const availableId = await GetAvailableTagID();
+        if(!availableId) {
+            return responseBuilder.BadRequest(res, "There is no available tag id. Remove some to assign it to this equipment.");
+        }
+
+        /** If new tag id out of range, return 400 */
+        if(tagIdDec < 0 || tagIdDec > 4095) {
+            return responseBuilder.BadRequest(res, `Student tag ID must be from #0000 to #0FFF. Available Tag ID: ${availableId}`);
+        } 
+
+        const existedRfidTag = await db("equipment")
+            .select("PK_EQUIPMENT_SERIAL_ID AS serialId")
+            .where("TAG_ID", "LIKE", rfidTag.trim())
+            .first();
+        
+        if(existedRfidTag && existedRfidTag.serialId.trim().toLowerCase() !== serialId.trim().toLowerCase()) {
+            return responseBuilder.BadRequest(res, `RFID Tag already in used. Available Tag ID: ${availableId}`);
+        }
+
+        return null;
+    } catch (error) {
+        /** adding error, easy to debug */
+        console.log("ERROR: There is an error while validating add equipment: ", error);
+        /** Return error message to client */
+        return responseBuilder.ServerError(res, "There is an error while adding equipment.");
+    }
+}
+
 /**
  * Handle validation before actually perform updating equipment
  * @param {object} res - The response object for the HTTP request.
@@ -162,9 +232,9 @@ async function EquipmentUpdateValidation(res, req, serialId) {
         }
         
         if(rfidTag) {
-            const existRfidTag = await db("equipment").select("PK_EQUIPMENT_SERIAL_ID").where("TAG_ID", "=", rfidTag.toLowerCase()).first();
-            if(existRfidTag && existRfidTag.PK_EQUIPMENT_SERIAL_ID.toLowerCase() !== serialId?.trim().toLowerCase()) {
-                return responseBuilder.BadRequest(res, "This RFID Tag is already in used.")
+            const rfidTagError = TagIdValidator(res, rfidTag, serialId.trim().toLowerCase());
+            if(rfidTagError) {
+                return rfidTagError;
             }
         }
 

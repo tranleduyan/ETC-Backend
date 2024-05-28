@@ -63,7 +63,7 @@ async function EquipmentAddition(res, req) {
 			FK_TYPE_ID: typeId,
 			FK_MODEL_ID: modelId,
             FK_CURRENT_ROOM_READER_ID: null,
-            TAG_ID: rfidTag?.trim(),
+            TAG_ID: rfidTag ? rfidTag.trim() : null,
 			MAINTENANCE_STATUS: maintenanceStatus.trim(),
 			RESERVATION_STATUS: reservationStatus.trim(),
 			USAGE_CONDITION: usageCondition.trim(),
@@ -100,6 +100,76 @@ async function EquipmentAddition(res, req) {
     }
 }
 
+async function GetAvailableTagID() {
+    const start = 0;
+    const end = 4095;
+    const allNumbers = Array.from({ length: end - start + 1 }, (_, i) => i + start);
+  
+    const existingNumbers = await db("equipment")
+        .select("TAG_ID")
+        .orderBy("TAG_ID", "ASC");
+  
+    // Map existingNumbers to an array of strings
+    const existingNumbersArray = existingNumbers.map(obj => obj.TAG_ID);
+  
+    // Convert HEX string to numbers
+    const existingNumbersAsNumbers = existingNumbersArray.map(hexString => gHelper.ConvertHEXStringToNumber(hexString));
+  
+    // Filter the available numbers
+    const availableNumbers = allNumbers.filter(number => !existingNumbersAsNumbers.includes(number));
+  
+    if (availableNumbers.length === 0) {
+        return null;
+    }
+  
+    const hexAvailableNumbers = gHelper.ConvertNumberToHEXString(availableNumbers[0]);
+    if(!hexAvailableNumbers){
+      return null;
+    }
+    return hexAvailableNumbers;
+  }
+
+async function TagIdValidator(res, rfidTag) {
+    try { 
+        if(typeof rfidTag !== "string") {
+            return responseBuilder.BadRequest(res, "Invalid request.");
+        }
+
+        /** Convert tagId from HEX to number */
+        const tagIdDec = gHelper.ConvertHEXStringToNumber(rfidTag.trim());
+        
+        if(typeof tagIdDec === "string") {
+            return responseBuilder.BadRequest(res, tagIdDec);
+        } 
+
+        const availableId = await GetAvailableTagID();
+        if(!availableId) {
+            return responseBuilder.BadRequest(res, "There is no available tag id. Remove some to assign it to this equipment.");
+        }
+
+        /** If new tag id out of range, return 400 */
+        if(tagIdDec < 0 || tagIdDec > 4095) {
+            return responseBuilder.BadRequest(res, `Student tag ID must be from #0000 to #0FFF. Available Tag ID: ${availableId}`);
+        } 
+
+        const existedRfidTag = await db("equipment")
+            .select("TAG_ID")
+            .where("TAG_ID", "LIKE", rfidTag.trim())
+            .first();
+        
+        if(existedRfidTag) {
+            return responseBuilder.BadRequest(res, `RFID Tag already in used. Available Tag ID: ${availableId}`);
+        }
+
+        return null;
+    } catch (error) {
+        /** adding error, easy to debug */
+        console.log("ERROR: There is an error while validating add equipment: ", error);
+        /** Return error message to client */
+        return responseBuilder.ServerError(res, "There is an error while adding equipment.");
+    }
+}
+
 /**
  * Handle validation before actually perform adding type
  * @param {object} res - The response object for the HTTP request.
@@ -109,7 +179,7 @@ async function EquipmentAddition(res, req) {
 async function EquipmentAdditionValidation(res, req) {
     try{
         /** Destructure variables from the request body */
-        const { schoolId, serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, homeLocations } = req;
+        const { schoolId, serialId, typeId, modelId, maintenanceStatus, reservationStatus, usageCondition, purchaseCost, purchaseDate, homeLocations, rfidTag} = req;
         
         /** We check for all required variables */
         if(!schoolId || !serialId || typeof(typeId) == "undefined" || typeof(modelId) == "undefined" || !maintenanceStatus || !reservationStatus || !usageCondition) {
@@ -163,6 +233,13 @@ async function EquipmentAdditionValidation(res, req) {
             const locations = await db("location").select("PK_LOCATION_ID").whereIn("PK_LOCATION_ID", homeLocations);
             if(locations && (locations.length !== homeLocations.length)) {
                 return responseBuilder.BadRequest(res, "One of the home location is not exists.");
+            }
+        }
+
+        if(rfidTag) {
+            const rfidTagError = await Promise.resolve(TagIdValidator(res, rfidTag));
+            if(rfidTagError) {
+                return rfidTagError;
             }
         }
         
