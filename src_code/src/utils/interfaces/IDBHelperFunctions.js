@@ -11,6 +11,7 @@ const antennaDBHelperFunctions = require("../services/helper_functions/db_helper
 module.exports = {
   GetUserInfoByEmailAddress: userDBHelperFunctions.GetUserInfoByEmailAddress,
   GetUserInfoBySchoolId: userDBHelperFunctions.GetUserInfoBySchoolId,
+  GetUserInfoByUserId: userDBHelperFunctions.GetUserInfoByUserId,
   GetUserUsage: userDBHelperFunctions.GetUserUsage,
   GetTypeInfoByName: typeDBHelperFunctions.GetTypeInfoByName,
   AddTypeToDatabase: typeDBHelperFunctions.AddTypeToDatabase,
@@ -28,5 +29,5 @@ module.exports = {
   GetLocationInformationById:
     locationDBHelperFunctions.GetLocationInformationById,
   GetAllAntennas: antennaDBHelperFunctions.GetAllAntennas,
-  GetAntennaInformationById: antennaDBHelperFunctions.GetAntennaInformationById
+  GetAntennaInformationById: antennaDBHelperFunctions.GetAntennaInformationById,
 };
