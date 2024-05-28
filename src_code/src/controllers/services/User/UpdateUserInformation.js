@@ -117,8 +117,8 @@ async function ValidateSchoolId(res, schoolId, userId) {
 
 async function ValidateTagId(res, tagId, userId) {
   /** If there is no tag id, then we don't have to do anything */
-  if(tagId === null) {
-    return;
+  if(!tagId) {
+    return null;
   }
 
   const availableTagId = await GetAvailableTagID(); 

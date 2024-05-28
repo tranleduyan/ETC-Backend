@@ -131,6 +131,9 @@ async function GetAvailableTagID() {
 
 async function TagIdValidator(res, rfidTag) {
     try { 
+        if(!rfidTag) {
+            return null; 
+        }
         if(typeof rfidTag !== "string") {
             return responseBuilder.BadRequest(res, "Invalid request.");
         }
