@@ -310,11 +310,32 @@ async function UpdateUserInformation(res, req, schoolId) {
       .update(updateData)
       .where("SCHOOL_ID", "LIKE", targetSchoolId.trim());
 
-      const userInfo = await Promise.resolve(dbHelper.GetUserInfoBySchoolId(db, newSchoolId.trim()))
+    const user = await Promise.resolve(dbHelper.GetUserInfoBySchoolId(db, schoolId.trim()));
+    
+    let responseObject = null;
+    if(user.userRole !== "Admin") {
+      responseObject = await Promise.resolve(dbHelper.GetUserInfoBySchoolId(db, newSchoolId.trim()))
+    } else {
+      responseObject = await db("user_info")
+      .select(
+        db.raw("COALESCE(FIRST_NAME, '') AS firstName"),
+        db.raw("COALESCE(MIDDLE_NAME, '') AS middleName"),
+        db.raw("COALESCE(LAST_NAME, '') AS lastName"),
+        db.raw("COALESCE(TAG_ID, '') AS tagId"),
+        "EMAIL_ADDRESS AS emailAddress",
+        "SCHOOL_ID AS schoolId",
+        db.raw("CONCAT(COALESCE(FIRST_NAME, ''), ' ', COALESCE(LAST_NAME, ''), ' - ID: ', COALESCE(SCHOOL_ID, 'Not Found')) AS fullNameId")
+      )
+      .orderBy([
+        { column: "lastName", order: "ASC" },
+        { column: "firstName", order: "ASC" },
+        { column: "middleName", order: "ASC" }
+      ]);
+    }
 
     return responseBuilder.BuildResponse(res, 200, {
       message: "Information update successfuly.",
-      responseObject:userInfo
+      responseObject: responseObject
     })
    
   } catch(error) {
