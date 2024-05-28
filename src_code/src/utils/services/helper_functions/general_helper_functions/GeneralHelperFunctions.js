@@ -301,7 +301,7 @@ async function RestoreDeletedDriveImage(drive, imageDriveFileId) {
 }
 
 function ConvertHEXStringToNumber(hexString, purpose = "tagId") {
-    if(typeof hexString !== 'string' || !/^[0-9A-Fa-f]+$/.test(hexString) || hexString.length !== 4) {
+    if(typeof hexString !== 'string' || !/^[0-9A-Fa-f]+$/.test(hexString) || (hexString.length > 0 && hexString < 4) || hexString.length > 4) {
       if(purpose === "tagId") {
         return "Invalid Tag ID. Tag ID must be HEX presentation.";
       } else {
