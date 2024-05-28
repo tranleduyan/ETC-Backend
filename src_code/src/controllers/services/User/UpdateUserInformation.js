@@ -152,33 +152,38 @@ async function ValidateTagId(res, tagId, userId) {
 async function ValidateFaculty(res, req, user) {
   try { 
     /** Extract variables from request body */
-    const { targetSchoolId, firstName, middleName, lastName, emailAddress, newSchoolId, tagId } = req;
+    const { targetSchoolId, firstName, middleName, lastName, emailAddress, newSchoolId, tagId, newUserRole } = req;
 
     /** Ensure required fields are filled */
-    if(!targetSchoolId || !firstName || !lastName || !emailAddress || !newSchoolId) {
+    if(!targetSchoolId || !firstName || !lastName || !emailAddress || !newSchoolId || !newUserRole) {
       return responseBuilder.MissingContent(res);
     }
     
+    /** Ensure user role is not updated */
+    if(newUserRole.trim() !== "Faculty"){
+      return responseBuilder.BadRequest(res, "Contact lab manager to help you.")  
+    }
+
     /** Ensure no update on school id */
     if(targetSchoolId.trim() !== newSchoolId.trim()) {
       return responseBuilder.BadRequest(res, "Invalid request.");
     }
 
     if(targetSchoolId.trim() !== user.schoolId.trim()) {
-      return responseBuilder.BadRequest(res, "Contact lab administrator to help you.");
+      return responseBuilder.BadRequest(res, "Contact lab manager to help you.");
     } 
 
     /** Ensure no update on tag id */
     if(user.tagId && !tagId) {
-      return responseBuilder.BadRequest(res, "Contact lab administrator to help you.");
+      return responseBuilder.BadRequest(res, "Contact lab manager to help you.");
     }
 
     if(tagId && !user.tagId) {
-      return responseBuilder.BadRequest(res, "Contact lab administrator to help you.");
+      return responseBuilder.BadRequest(res, "Contact lab manager to help you.");
     } 
 
     if(tagId && user.tagId && (tagId.trim() !== user.tagId.trim())) {
-      return responseBuilder.BadRequest(res, "Contact lab administrator to help you.");
+      return responseBuilder.BadRequest(res, "Contact lab manager to help you.");
     }
 
     /** Ensure that name field is valid */
@@ -211,10 +216,10 @@ async function ValidateFaculty(res, req, user) {
 
 async function ValidateAdmin(res, req, user) {
   /** Extract variables from request body */
-  const { targetSchoolId, firstName,middleName, lastName, emailAddress, newSchoolId, tagId } = req;
+  const { targetSchoolId, firstName,middleName, lastName, emailAddress, newSchoolId, tagId, newUserRole } = req;
 
   /** Ensure required fields are filled */
-  if(!targetSchoolId || !firstName || !lastName || !emailAddress || !newSchoolId) {
+  if(!targetSchoolId || !firstName || !lastName || !emailAddress || !newSchoolId || !newUserRole) {
     return responseBuilder.MissingContent(res);
   }
 
@@ -222,6 +227,11 @@ async function ValidateAdmin(res, req, user) {
 
   if(!targetUser) {
     return responseBuilder.NotFound(res, "User");
+  }
+
+  /** Validate user role */
+  if(newUserRole !== "Admin" && newUserRole !== "Faculty" && newUserRole !== "Student") {
+    return responseBuilder.BadRequest(res, "Invalid role.");
   }
 
   /** Validate name */
@@ -295,7 +305,7 @@ async function UpdateUserInformation(res, req, schoolId) {
       return errors;
     }
     
-    const { targetSchoolId, firstName, middleName, lastName, emailAddress, newSchoolId, tagId} = req;
+    const { targetSchoolId, firstName, middleName, lastName, emailAddress, newSchoolId, tagId, newUserRole} = req;
 
     const updateData = {
       FIRST_NAME: firstName.trim(),
@@ -303,7 +313,8 @@ async function UpdateUserInformation(res, req, schoolId) {
       LAST_NAME: lastName.trim(),
       EMAIL_ADDRESS: emailAddress.trim(),
       SCHOOL_ID: newSchoolId.trim(),
-      TAG_ID: tagId ? tagId.trim() : null
+      TAG_ID: tagId ? tagId.trim() : null,
+      USER_ROLE: newUserRole.trim()
     }
 
     await db("user_info")
@@ -324,7 +335,8 @@ async function UpdateUserInformation(res, req, schoolId) {
         db.raw("COALESCE(TAG_ID, '') AS tagId"),
         "EMAIL_ADDRESS AS emailAddress",
         "SCHOOL_ID AS schoolId",
-        db.raw("CONCAT(COALESCE(FIRST_NAME, ''), ' ', COALESCE(LAST_NAME, ''), ' - ID: ', COALESCE(SCHOOL_ID, 'Not Found')) AS fullNameId")
+        db.raw("CONCAT(COALESCE(FIRST_NAME, ''), ' ', COALESCE(LAST_NAME, ''), ' - ID: ', COALESCE(SCHOOL_ID, 'Not Found')) AS fullNameId"),
+        "USER_ROLE AS userRole"
       )
       .orderBy([
         { column: "lastName", order: "ASC" },

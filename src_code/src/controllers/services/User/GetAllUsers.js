@@ -19,7 +19,8 @@ async function GetAllUsers(res) {
         db.raw("COALESCE(TAG_ID, '') AS tagId"),
         "EMAIL_ADDRESS AS emailAddress",
         "SCHOOL_ID AS schoolId",
-        db.raw("CONCAT(COALESCE(FIRST_NAME, ''), ' ', COALESCE(LAST_NAME, ''), ' - ID: ', COALESCE(SCHOOL_ID, 'Not Found')) AS fullNameId")
+        db.raw("CONCAT(COALESCE(FIRST_NAME, ''), ' ', COALESCE(LAST_NAME, ''), ' - ID: ', COALESCE(SCHOOL_ID, 'Not Found')) AS fullNameId"),
+        "USER_ROLE AS userRole"
       )
       .orderBy([
         { column: "lastName", order: "ASC" },
