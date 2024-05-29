@@ -215,10 +215,11 @@ async function AddScanToDatabase(db, scanData) {
         .limit(1);
       
       //** If no last scan */
-      console.log("----- lastScan: ", lastScan);
+      console.log("ITEMS[i] ", items[i]);
         if (lastScan.length == 0) {
-          lastScan = JSON.parse('{"FK_EQUIPMENT_TAG_ID":', items[i], ', "SCAN_TIME":"2020-05-30T03:09:44.000Z", "IS_WALK_IN":"1", "FK_LOCATION_ROOM_READER_ID":"0001"}');
-      }
+          lastScan = JSON.parse('{"SCAN_TIME":"2020-05-30T03:09:44.000Z", "IS_WALK_IN":"1", "FK_LOCATION_ROOM_READER_ID":"0001"}');
+        }
+        console.log("----- lastScan: ", lastScan);
       //** Turn into JSON */
       const lastScanData = Object.values(JSON.parse(JSON.stringify(lastScan)));
       console.log("------- lastScan Data: ", lastScanData);
