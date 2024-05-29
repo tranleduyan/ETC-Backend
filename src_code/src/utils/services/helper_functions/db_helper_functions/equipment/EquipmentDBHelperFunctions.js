@@ -203,7 +203,7 @@ async function AddScanToDatabase(db, scanData) {
     for (i = 0; i < items.length; ++i) {
       console.log("item: ", i, items[i]);
       /** Finds latest scan entry of particular equipment to determine if it is entering or exiting antenna's room. */
-      const lastScan = await db("scan_history")
+      let lastScan = await db("scan_history")
         .select(
           "FK_EQUIPMENT_TAG_ID",
           "SCAN_TIME",
@@ -213,7 +213,12 @@ async function AddScanToDatabase(db, scanData) {
         .where("FK_EQUIPMENT_TAG_ID", "=", items[i])
         .orderBy("SCAN_TIME", "desc")
         .limit(1);
-
+      
+      //** If no last scan */
+      console.log("----- lastScan: ", lastScan);
+        if (lastScan.length == 0) {
+          lastScan = JSON.parse('{"FK_EQUIPMENT_TAG_ID":', items[i], ', "SCAN_TIME":"2020-05-30T03:09:44.000Z", "IS_WALK_IN":"1", "FK_LOCATION_ROOM_READER_ID":"0001"}');
+      }
       //** Turn into JSON */
       const lastScanData = Object.values(JSON.parse(JSON.stringify(lastScan)));
       console.log("------- lastScan Data: ", lastScanData);
@@ -363,6 +368,7 @@ function EquipmentLocationHandler(lastScan, scanData) {
    */
   console.log("IN EQUIPMENTLOCATION ---- lastScan:", lastScan);
 
+  console.log(lastScan[0]);
   console.log(
     "lastScan FK_LOCATION_ROOM_READER_ID ",
     lastScan[0].FK_LOCATION_ROOM_READER_ID
