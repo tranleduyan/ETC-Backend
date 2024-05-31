@@ -912,5 +912,20 @@ router.get("/antenna/:antennaId", async (request, response) => {
   }
 })
 
+/**
+ * GET/RETRIEVE ALL EQUIPMENTS & USER THAT HAVE TAG IDS
+ * URL => /api/inventory/rfid-tags
+ * 
+ * No request body
+ */
+router.get("/rfid-tags", async(_, response) => {
+  try {
+    return await Promise.resolve(inventoryServices.GetTagIdsEquipmentAndUser(response));
+  } catch(error){
+    console.log("ERROR: There is an error while retrieving rfid tags information:", error);
+    return responseBuilder.ServerError(response, "There is an error while retrieving information.")
+  }
+});
+
 /** Exports the router */
 module.exports = router;

@@ -127,7 +127,7 @@ async function GetAvailableTagID() {
       return null;
     }
     return hexAvailableNumbers;
-  }
+}
 
 async function TagIdValidator(res, rfidTag) {
     try { 
