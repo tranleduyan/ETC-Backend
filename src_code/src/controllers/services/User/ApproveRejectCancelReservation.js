@@ -51,10 +51,10 @@ async function ApproveReservation(res, userId, reservationId) {
     }
 
     if (allReservation.length === 0) {
-      return responseBuilder.BadRequest(
-        res,
-        "There is no reservation at the moment."
-      );
+      return responseBuilder.BuildResponse(res, 200, {
+        message: `${type.charAt(0).toUpperCase() + type.slice(1)} a reservation successfully. There is no reservation at the moment.`,
+        responseObject: [],
+    });
     }
 
     return responseBuilder.BuildResponse(res, 200, {
@@ -118,10 +118,10 @@ async function CancelRejectReservation(res, type, userId, reservationId) {
 
 
     if (allReservation.length === 0) {
-      return responseBuilder.BadRequest(
-        res,
-        "There is no reservation at the moment."
-      );
+      return responseBuilder.BuildResponse(res, 200, {
+        message: `${type.charAt(0).toUpperCase() + type.slice(1)} a reservation successfully. There is no reservation at the moment.`,
+        responseObject: [],
+    });
     }
 
     return responseBuilder.BuildResponse(res, 200, {
@@ -214,6 +214,9 @@ async function ValidateCancelReservation(res, userId, reservationId) {
       reservationPromise,
       userPromise,
     ]);
+
+    console.log(reservation);
+    console.log(user);
 
     if (!reservation) {
       return responseBuilder.NotFound(res, "Reservation");
