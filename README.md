@@ -73,5 +73,5 @@ This repo uses npm and Node.js: [How to Install npm and Node.js](https://docs.np
 First install all needed dependencies
 npm install
 Then simply start the server
-npm run start
+npm run start 
 There you go! Now you can start sending requests to the server :)
